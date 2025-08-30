@@ -3,8 +3,8 @@ export type Role = 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'
 export class User {
     id: number;
     username: string;
-    email: string;
     password: string;
+    email: string;
     roles: Role[];
     groups: string[];
 
