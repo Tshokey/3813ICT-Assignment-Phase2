@@ -10,6 +10,7 @@ export class AuthService {
   private router = inject(Router);
   private _loggedIn = signal(false);
   private _user = signal<User | null>(null);
+  private users: User[] = [];
 
   readonly currentUser = computed(()=>this._user());
   readonly isloggedIn = computed(()=>this._loggedIn());
@@ -24,6 +25,14 @@ export class AuthService {
   };
 
   constructor() {
+    const savedUsers = localStorage.getItem('users');
+    this.users = savedUsers ? JSON.parse(savedUsers) : [];
+
+    if (!this.users.find(u => u.username === this.superUser.username)) {
+      this.users.push(this.superUser);
+      localStorage.setItem('users', JSON.stringify(this.users));
+    }
+
     const saved = localStorage.getItem('currentUser');
     if (saved) {
       this._user.set(JSON.parse(saved));
@@ -31,20 +40,33 @@ export class AuthService {
     }
   }
 
+
   login(username:string,password:string):boolean{
-    if(username === 'super' && password === '123'){
-      this.setCurrentuser(this.superUser);
+    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+    const found = users.find(u=> u.username === username && u.password === password);
+    if(found){
+      this.setCurrentuser(found);
       return true;
     }
     return false;
   }
 
-  setCurrentuser(user:User | null){
+   register(newUser: User): boolean {
+    if (this.users.find(u => u.username === newUser.username)) {
+      return false; 
+    }
+    newUser.id = this.users.length + 1;
+    this.users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(this.users));
+    return true;
+  }
+
+  setCurrentuser(newuser:User | null){
    
-    this._user.set(user);
-    this._loggedIn.set(!!user);
-    if(user){
-      localStorage.setItem('currentUser',JSON.stringify(user));
+    this._user.set(newuser);
+    this._loggedIn.set(!!newuser);
+    if(newuser){
+      localStorage.setItem('currentUser',JSON.stringify(newuser));
     }else{
       localStorage.removeItem('currentUser');
     }
