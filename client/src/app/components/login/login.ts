@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterModule, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { FormsModule } from '@angular/forms';
 
 
+
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [RouterModule,FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -22,8 +23,10 @@ export class Login {
     if(logged){
       this.router.navigate(['/dashboard']);
       } else {
-        this.errormsg = 'Invalid email or password';
+        this.errormsg = 'Invalid username or password';
       }
+      
     }
+    
   }
 
