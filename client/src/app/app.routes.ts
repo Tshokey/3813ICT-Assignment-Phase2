@@ -9,8 +9,13 @@ import { Channels } from './components/channels/channels';
 export const routes: Routes = [
     {
         path: '',
+        component: Login,
+    }, 
+    {
+        path: 'dashboard',
         component: Dashboard,
-    }, {
+    }, 
+    {
         path: 'login',
         component: Login,
     },

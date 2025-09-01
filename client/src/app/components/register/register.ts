@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, RouterLink } from '@angular/router';
 import { User } from '../../models/user';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-register',
-  imports: [RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
@@ -49,3 +49,4 @@ export class Register {
     this.router.navigate(['/login']);
   }
 }
+

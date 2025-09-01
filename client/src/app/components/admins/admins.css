@@ -1,0 +1,60 @@
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th {
+    text-align: center;
+    padding: 10px 16px; 
+    border: 1px solid black; 
+    vertical-align: top;
+}
+.admin-table td {
+  padding: 10px 16px; 
+  border: 1px solid black; 
+  vertical-align: top;
+}
+
+.admin-table th {
+  background-color: #5c94cf;
+  color: white;
+}
+
+.admin-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.checkbox-label {
+  display: inline-block;
+  margin-right: 16px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.promote-btn {
+  display: block;
+  margin: 20px auto 0 auto;
+  padding: 10px 20px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.promote-btn:hover {
+  background-color: #589be4;
+}

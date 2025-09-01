@@ -1,1 +1,43 @@
-<p>admins works!</p>
+<div class="container">
+    <h2>Admins Management</h2>
+
+    <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Roles</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+
+        <tr *ngFor="let u of users">
+            <td>{{u.username}}</td>
+                
+            <td>
+                <div *ngFor="let role of u.roles">{{ role }}</div>
+            </td>
+
+            <td>
+                <label *ngIf="canPromoteGroup(u)" class="checkbox-label">
+                    <input type="checkbox" [(ngModel)]="u.toPromoteGroup" />Group Admin
+                </label>
+
+                <label *ngIf="canPromoteSuper(u)" class="checkbox-label">
+                    <input type="checkbox" [(ngModel)]="u.toPromoteSuper" />Super Admin
+                </label>
+                    
+                <label *ngIf="canRemove(u)" class="checkbox-label">
+                    <button (click)="removeUser(u)">Remove</button>
+                </label>
+            </td>
+        </tr>
+    </tbody>
+        
+    </table>
+    
+    <div>
+        <button class="promote-btn" (click)="promoteSelected()">Promote</button>
+    </div>
+    
+</div>

@@ -40,7 +40,6 @@ export class AuthService {
     }
   }
 
-
   login(username:string,password:string):boolean{
     const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
     const found = users.find(u=> u.username === username && u.password === password);
@@ -49,16 +48,6 @@ export class AuthService {
       return true;
     }
     return false;
-  }
-
-   register(newUser: User): boolean {
-    if (this.users.find(u => u.username === newUser.username)) {
-      return false; 
-    }
-    newUser.id = this.users.length + 1;
-    this.users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(this.users));
-    return true;
   }
 
   setCurrentuser(newuser:User | null){

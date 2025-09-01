@@ -8,12 +8,22 @@ export class User {
     roles: Role[];
     groups: string[];
 
-    constructor(id: number = 0, username: string='', email:string='', password:string='', roles:Role[]=[], groups:string[]=[]){
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.roles = roles;
-        this.groups = groups;
+    toPromoteGroup?: boolean = false;
+    toPromoteSuper?: boolean = false;
+
+    constructor(
+        id: number = 0, 
+        username: string='', 
+        email:string='', 
+        password:string='', 
+        roles:Role[]=[], 
+        groups:string[]=[])
+        {
+            this.id = id;
+            this.username = username;
+            this.password = password;
+            this.email = email;
+            this.roles = roles;
+            this.groups = groups;
+        }
     }
-}
