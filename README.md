@@ -1,7 +1,5 @@
 # ChatApp - Phase 1
-
 ---
-
 ## 1. Git Repository Organization
 **Repository Structures:**
 - The **root** holds project configurations and documentation.
@@ -98,7 +96,7 @@ export const routes: Routes = [
     { path: 'admins', component: Admins,}
 ];
 ```
-The default link opens the login page.
+- The default link opens the login page.
 
 Component-Service Interaction
 - Login/Register: `AuthService` updates current user and persists in lcalStorage.
