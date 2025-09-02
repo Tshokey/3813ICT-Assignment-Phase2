@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { User } from '../../models/user';
 import { AuthService } from '../../services/auth-service';
+import { GroupService } from '../../services/group-service';
 
 @Component({
   selector: 'app-admins',
@@ -13,7 +14,8 @@ import { AuthService } from '../../services/auth-service';
 export class Admins {
   users: User[] = [];
 
-  constructor(private auth: AuthService){
+  constructor(private auth: AuthService, private groupService: GroupService){
+    
     this.loadUsers();
   }
 

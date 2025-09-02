@@ -5,6 +5,7 @@ import { Dashboard } from './components/dashboard/dashboard';
 import { Admins } from './components/admins/admins';
 import { Groups } from './components/groups/groups';
 import { Channels } from './components/channels/channels';
+//import { Channels } from './components/channels/channels';
 
 export const routes: Routes = [
     {
