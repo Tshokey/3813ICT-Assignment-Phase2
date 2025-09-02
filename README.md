@@ -1,59 +1,71 @@
 # ChatApp - Phase 1
----
+
 ## 1. Git Repository Organization
 **Repository Structures:**
-- The **root** holds project configurations and documentation.
-- `src/app/components/` consists of each UI page as a standalone component.
-- `src/app/models/` stores the TypeScript model definitions for `User`, `Group` and `Channel`.
-- `src/app/services/` contains  logic for authentication and data manipulation which is stored via localStorage.
+
+The project is organized to keep code modular, maintainable, and easy to navigate:
+
+- The **root** directory holds project configurations and documentation.
+- Components folder (`src/app/components/`) - consists of each UI page as a standalone component. This separation allows each page to be developed and tested independently.
+- Models folder (`src/app/models/`) - stores TypeScript classes that define the data entities for User, Group and Channel. Models centralize the data structure definitions for consistent use across the application.
+- Services folder (`src/app/services/`) - contains services for authentication, group, and channel management. These services handle data operations and state management, currently using localStorage.
 
 **Version Control**
-- The project development is tracked in `main` branch, it is updated with meaningful, incremental commits.
-- Commits describe each feature addition or fix for the smooth working.
-- Frequent commits ensure strong traceability of devlopment progress.
+- Development is tracked on the `main` branch.
+- Commits are incremental and meaningful, each describing a feature addition or bug fix.
+- Frequent commits ensure clear traceability and make it easier to review and revert changes if needed.
+- This approach ensures smooth collaboration and maintains a clean history of project progress.
 
 ---
 
 ## 2. Data Structures
 
-All application data is stored in browser's **localStorage** for Phase 1:
+All application data persists in the browser's **localStorage** for Phase 1. The key entities are:
 
 ### `User` (models/user.ts)
+- Represents an individual user and their roles in the system. 
 ```
 export class User {
     id: number;
     username: string;
     password: string;
     email: string;
-    roles: Role[]; 
-    groups: string[];
+    roles: Role[];         // 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'
+    groups: string[];      // List of group names the user belongs to
 }
 ```
-The `roles` entity includes 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN' which is accessed `export type Role = 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'`
 
 ### `Group` (models/groups.ts)
+- Represents a group which can contain channels and users.
 ```
 export class Group {
   name: string;
-  createdBy: string;
-  admins: string[]; 
-  members: string[];
-  channels: string[];
-  interested: string[]; 
-  bannedUsers: { [channel: string]: string[]}
+  createdBy: string;        // Username of the creator
+  admins: string[];         // Usernames of group admins
+  members: string[];        // Usernames of group members
+  channels: string[];       // List of channels within the group
+  interested: string[];     // Users interested to join the group
+  bannedUsers: { [channel: string]: string[]}    // Channel specific ban
 }
 ```
 ### `Channel` (models/channel.ts)
+- Represents a communication channel within a group.
 ```
 export class Channel {
     name: string;
-    groupName: string;
-    members: string[];
-    bannedUsers: string[];
+    groupName: string;        // Name of the parent group
+    members: string[];        // Users in the channel
+    bannedUsers: string[];    // Users banned from the channel
 }
 ```
+Relationships:
+- A user can belong to multiple groups.
+- A group can contain multiple channels.
+- Roles (USER, GROUP_ADMIN, SUPER_ADMIN) determine what actions a user can perform within groups and channels
+---
+
 ### 3. REST API
-- Phase 1 usese no server API; localStorage is used instead. The following displays the planned RESTful API structure for backend integration in Phase 2:
+- Phase 1 uses localStorage instead of a backend API. The following is the planned RESTful API structure for Phase 2:
 
 Method | Route | Parameters | Return Values | Purpose
 ----- | ----- | ----- | ----- | ----- |
@@ -66,25 +78,29 @@ GET | /api/groups/:id/channels | - | Channel[] | Fetch channels ina group
 POST | /api/channels | {name, groupId} | {channel} | Create a new channel
 POST | /api/channels/:id/join | {userId} | {success) | Add a user to a channel
 
+- In Phase 2, angular will communicate with these endpoints using HttpClient service.
+---
+
 ### 4. Angular Architecture
 
 Components
-- Register (/register): Handles user registration form.
-- Login (/login): Handles user login form.
-- Dashboard (/dashboard): Displays user information and links based on role.
-- Groups (/groups): Manage display, creation, joining, leaving and deleting groups according to their role.
-- Channels (/channels): List, create, join, leavr and delete functionalities for channels.
-- Admins (/admins): For 'Super' to manage user roles.
+- Register (/register): Handles user registration.
+- Login (/login): Handles user login.
+- Dashboard (/dashboard): Displays user information and navigation based on role.
+- Groups (/groups): Manages display, creation, joining, leaving and deleting groups.
+- Channels (/channels): Lists, creates, joins, leaves and deletes channels.
+- Admins (/admins): Allow `SUPER_ADMIN` users to manage user roles.
 
 Services
-- AuthService: Manages authetication state, login/logout and role checks.
-- GroupService: CRUD (Create, Read, Update, Delete) operations for groups stored in localStorage.
-- ChannelService: CRUD operations for channels stored in localStorage.
+- AuthService: Manages login/logout, authetication state, and role checks.
+- GroupService: CRUD (Create, Read, Update, Delete) operations for groups, stored in localStorage.
+- ChannelService: CRUD operations for channels, stored in localStorage.
 
 Models
-- User, Group and Channel classes define data entities used across components and services.
+- Define the data entities (User, Group and Channel) for consistent use across components and services.
 
 Routes
+- Maps URLs to components
 ```
 export const routes: Routes = [
     { path: '', component: Login,}, 
@@ -96,12 +112,12 @@ export const routes: Routes = [
     { path: 'admins', component: Admins,}
 ];
 ```
-- The default link opens the login page.
+- Default route opens the login page.
 
 Component-Service Interaction
-- Login/Register: `AuthService` updates current user and persists in lcalStorage.
-- Groups/Channels: UI components call GroupService and ChannelService to manipulate localStorage, updating lists and UI reactively.
-- Role-based UI: Views conditionally dispay actions such as create group/channel based on roles via AuthService.
+- Login/Register: `AuthService` updates current user and persists it in localStorage.
+- Groups/Channels: Components call GroupService and ChannelService to manipulate localStorage, update the lists and UI reactively.
+- Role-based UI: Components display actions conditionally based on roles using AuthService.
 
 
 
