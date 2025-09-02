@@ -1,42 +1,42 @@
 <div class="dashboard-container">
-    <h2>Dashboard</h2>
+    <h2 class="dashboard-title">Dashboard</h2>
 
-    <div *ngIf="!isLoggedIn"> 
-        <p>Please login or register to continue.</p>
-        <a routerLink="/login" class="btn btn-primary">Login</a>
-        <a routerLink="/register" class="btn btn-secondary">Register</a>
-    </div>
-
-    <div *ngIf="isLoggedIn && user">
-        <p>Welcome, <strong>{{user.username}}</strong>!</p>
-        <p>Your roles: {{user.roles.join(',')}}</p>
-
-        <div *ngIf="isSuperAdmin">
-            <h3>Super Admin Panel</h3>
-            <ul>
-                <li><a routerLink="/admins">Manage Admins</a></li>
-                <li><a routerLink="/groups">Manage Groups</a></li>
-                <li><a routerLink="/channels">Manage Channels</a></li>
-            </ul>
+    <div *ngIf="isLoggedIn && user" class="card">
+        <div class="card-header">
+            <p>Welcome, <strong>{{user.username}}</strong>!</p>
+            <p>Your roles: {{user.roles.join(', ')}}</p>
         </div>
 
-        <div *ngIf="isGroupAdmin && !isSuperAdmin">
-            <h3>Group Admin Panel</h3>
-            <ul>
-                <li><a routerLink="/groups">Manage Groups</a></li>
-                <li><a routerLink="/channels">Manage Channels</a></li>
-            </ul>
+        <div class="card-body">
+            <div *ngIf="isSuperAdmin" class="Panel">
+                <h3 class="panel-title">Super Admin Panel</h3>
+                <ul>
+                    <li><a routerLink="/admins">Manage Admins</a></li>
+                    <li><a routerLink="/groups">Manage Groups</a></li>
+                    <li><a routerLink="/channels">Manage Channels</a></li>
+                </ul>
+            </div>
+
+            <div *ngIf="isGroupAdmin && !isSuperAdmin" class="Panel">
+                <h3 class="panel-title">Group Admin Panel</h3>
+                <ul>
+                    <li><a routerLink="/groups">Manage Groups</a></li>
+                    <li><a routerLink="/channels">Manage Channels</a></li>
+                </ul>
+            </div>
+
+            <div *ngIf="user.roles.includes('USER') && !isGroupAdmin" class="Panel">
+                <h3 class="panel-title">User Panel</h3>
+                <p>Access your groups and channels to chat.</p>
+                <ul>
+                    <li><a routerLink="/groups">My Groups</a></li>
+                    <li><a routerLink="/channels">My Channels</a></li>
+                </ul>
+            </div>
         </div>
 
-        <div *ngIf="user.roles.includes('USER') && !isGroupAdmin">
-            <h3>User Panel</h3>
-            <p>Access your groups and channels to chat.</p>
-            <ul>
-                <li><a routerLink="/groups">My Groups</a></li>
-                <li><a routerLink="/channels">My Channels</a></li>
-            </ul>
+        <div class="card-footer text-end">
+            <button class="btn btn-primary" (click)="logout()">Logout</button>
         </div>
-
-        <button class="btn btn-primary" (click)="logout()">Logout</button>
     </div>
 </div>

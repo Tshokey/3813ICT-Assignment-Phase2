@@ -1,0 +1,11 @@
+.dashboard-title {
+  text-align: center;
+}
+
+.dashboard-container{
+  padding: 1rem;
+}
+
+ul li a {
+  color: #0b4b50;
+}
