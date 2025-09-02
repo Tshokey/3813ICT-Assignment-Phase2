@@ -105,12 +105,22 @@ export class Channels {
     }
   }
 
-   reportUser(channel: Channel, username: string, reason: string): void {
+  reportUser(channel: Channel, username: string, reason: string): void {
     if (!this.user) return;
     if (this.user) {
       this.channelService.reportUser(channel.groupName, channel.name, username, reason);
       alert(`${username} has been reported to super admins.`);
     }
+  }
+  
+  removeMember(channel: Channel, username: string): void{
+      if (!this.user) return;
+  
+      if (this.auth.hasRole('SUPER_ADMIN') || (this.auth.hasRole('GROUP_ADMIN'))) {
+        this.channelService.removeMember(channel.name, username);
+      } else {
+        this.errormsg = "You don't have permission to remove members from this group.";
+      }
   }
 
 }

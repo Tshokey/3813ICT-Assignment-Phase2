@@ -47,6 +47,7 @@
             <div class="btn-group">
               <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-danger ms-2" (click)="banUser(channel, m)"><small>Ban</small></button>
               <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-warning ms-2" (click)="reportUser(channel, m, 'Misconduct')"><small>Report</small></button>
+              <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="checkbox-label ms-2" (click)="removeMember(channel, m)">Remove</button>
             </div>
           </li>
         </ul>
