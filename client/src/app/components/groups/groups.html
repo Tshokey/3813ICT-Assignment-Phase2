@@ -1,1 +1,61 @@
-<p>groups works!</p>
+<div class="container">
+  <h1>Groups</h1>
+  <div *ngIf="user">
+    <p>Logged in as: {{user.username}} </p>
+    <p>(Roles: {{user.roles.join(', ')}})</p>
+  </div>
+
+  <div *ngIf="errormsg" class="alert alert-danger">{{errormsg}}</div>
+
+  <div *ngIf="auth.hasRole('GROUP_ADMIN') || auth.hasRole('SUPER_ADMIN')">
+    <input [(ngModel)]="newGroupName" class="form-control" />
+    <button class="btn btn-primary mt-2" (click)="createGroup()">Create Group</button>
+  </div>
+  <hr/>
+
+  <h3>All Groups</h3>
+  <ul class="list-group">
+    <li *ngFor="let group of groups" class="list-group-item ">
+      <h6><strong>{{group.name}}</strong></h6>
+      <small> (Group Admins: {{group.admins.join(', ')}})</small>
+
+      <div class="mt-1">
+        <strong>Members </strong>
+        <span *ngIf="group.members.length; else noMembers">
+        </span>
+        <ng-template #noMembers>
+        <em>No members yet</em>
+        </ng-template>
+        <ul>
+          <li *ngFor="let m of group.members" class="d-flex justify-content-between align-items-center">
+            <span>{{m}}</span>
+            <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')"
+                    class="checkbox-label mt-2" 
+                    (click)="removeMember(group, m)">
+              Remove
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mt-2">
+        <button *ngIf="user && !group.members.includes(user.username) && !group.interested.includes(user.username)" class="btn btn-sm btn-success ms-2" (click)="registerInterest(group)">Join</button>
+        <button *ngIf="user && group.interested.includes(user.username)" class="btn btn-sm btn-secondary me-2" disabled>Request Send</button>
+        <button *ngIf="user && group.members.includes(user.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveGroup(group)">Leave</button>
+        <button *ngIf="user && (auth.hasRole('SUPER_ADMIN') || (auth.hasRole('GROUP_ADMIN') && group.createdBy === user.username))" class="btn btn-sm btn-danger ms-2" (click)="deleteGroup(group)">Delete</button>
+    </div>
+
+    <div *ngIf="auth.hasRole('SUPER_ADMIN') || (user && group.admins.includes(user.username))" class="mt-2 ">
+        <h5><strong>Pending Requests</strong></h5> 
+        <ul>
+            <li *ngFor="let u of group.interested">
+            {{ u }}
+            <button class="btn btn-sm btn-success ms-2" (click)="approveUser(group, u)">Accept</button>
+            <button class="btn btn-sm btn-success ms-2" (click)="rejectUser(group, u)">Delete</button>
+            </li>
+        </ul>
+   </div>
+</li>
+</ul>
+</div>
+
