@@ -1,93 +1,151 @@
-import { Injectable, signal, Signal } from '@angular/core';
+import { Injectable, inject, signal, Signal } from '@angular/core';
 import { Group } from '../models/group';
 import { AuthService } from './auth-service';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GroupService {
+  private http = inject(HttpClient);
   private _groups = signal<Group[]>([]);
+  private apiUrl = "http://localhost:3000/api/groups";
 
   constructor(private auth: AuthService) {
-    const saved = localStorage.getItem('groups');
-    this._groups.set(saved ? JSON.parse(saved) : []);
+    this.loadGroups();
   }
 
   get groups(): Signal<Group[]> {
     return this._groups.asReadonly();
   }
 
-  private save() {
-    localStorage.setItem('groups', JSON.stringify(this._groups()));
-  }
-
-  createGroup(group: Group): void {
-    const groups = this._groups();
-     if (groups.some(g => g.name.toLowerCase() === group.name.toLowerCase())) return;
-    groups.push(group);
-    this._groups.set(groups);
-    this.save();
-  }
-
-  sendJoinRequest(groupName: string, username: string) {
-    const groups = this._groups();
-    const g = groups.find(g => g.name === groupName);
-    if (g && !g.interested.includes(username) && !g.members.includes(username)) {
-      g.interested.push(username);
+  private async loadGroups() {
+    try {
+      const groups = await firstValueFrom(this.http.get<Group[]>(this.apiUrl));
       this._groups.set(groups);
-      this.save();
+    } catch (error) {
+      console.error("Error loading groups:", error);
     }
   }
 
-  approveUser(groupName: string, username: string) {
-    const groups = this._groups();
-    const g = groups.find(g => g.name === groupName);
-    if (g) {
-      g.members.push(username);
-      g.interested = g.interested.filter(u => u !== username);
-      this._groups.set(groups);
-      this.save();
+  async createGroup(group: Group): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; group?: Group; message?: string }>(this.apiUrl, group),
+      )
+
+      if (response.success && response.group) {
+        const groups = this._groups();
+        groups.push(response.group);
+        this._groups.set(groups);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error creating group:", error);
+      return false;
     }
   }
 
-  rejectUser(groupName: string, username: string) {
-    const groups = this._groups();
-    const g = groups.find(g => g.name === groupName);
-    if (g) {
-      g.interested = g.interested.filter(u => u !== username);
-      this._groups.set(groups);
-      this.save();
+  async sendJoinRequest(groupName: string, username: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}/join`, { username }),
+      )
+
+      if (response.success) {
+        await this.loadGroups(); // Refresh groups
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error sending join request:", error)
+      return false;
     }
   }
 
-  leaveGroup(groupName: string, username: string) {
-    const groups = this._groups();
-    const g = groups.find(g => g.name === groupName);
-    if (g) {
-      g.members = g.members.filter(u => u !== username);
-      this._groups.set(groups);
-      this.save();
+  async approveUser(groupName: string, username: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}/approve`, { username }),
+      )
+
+      if (response.success) {
+        await this.loadGroups(); // Refresh groups
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error approving user:", error);
+      return false;
     }
   }
 
-  deleteGroup(groupName: string): void {
-    const groups = this._groups().filter(g => g.name !== groupName);
-    this._groups.set(groups);
-    this.save();
-  }
+  async rejectUser(groupName: string, username: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}/reject`, { username }),
+      )
 
-  removeMember(groupName: string, username: string): void{
-    const groups = this._groups();
-    const group = groups.find(g => g.name === groupName);
-
-    if(group){
-      group.members = group.members.filter(u => u !== username);
-
-      group.interested = group.interested.filter(u=> u!== username);
-
-      this._groups.set(groups);
-      localStorage.setItem('groups', JSON.stringify(groups));
+      if (response.success) {
+        await this.loadGroups(); // Refresh groups
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error rejecting user:", error);
+      return false;
     }
   }
 
-  
+  async leaveGroup(groupName: string, username: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}/leave`, { username }),
+      )
 
+      if (response.success) {
+        await this.loadGroups(); // Refresh groups
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error leaving group:", error);
+      return false;
+    }
+  }
+
+  async deleteGroup(groupName: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.delete<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}`),
+      )
+
+      if (response.success) {
+        const groups = this._groups().filter((g) => g.name !== groupName);
+        this._groups.set(groups);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      return false;
+    }
+  }
+
+  async removeMember(groupName: string, username: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.delete<{ success: boolean; message?: string }>(`${this.apiUrl}/${groupName}/members/${username}`),
+      )
+
+      if (response.success) {
+        await this.loadGroups(); // Refresh groups
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error removing member:", error);
+      return false;
+    }
+  }
 }
