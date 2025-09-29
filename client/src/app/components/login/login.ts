@@ -1,24 +1,35 @@
-import { Component } from '@angular/core';
-import { RouterModule, Router, RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
 import { FormsModule } from '@angular/forms';
 
 
 @Component({
   selector: 'app-login',
-  imports: [RouterModule,FormsModule, RouterLink],
+  imports: [FormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login {
-  username: string = '';
-  password: string = '';
-  errormsg: string = '';
+export class Login implements OnInit{
+  username = '';
+  password = '';
+  errormsg = '';
 
-  constructor(private router: Router, private auth: AuthService){}
+  private router = inject(Router); 
+  private auth = inject(AuthService)
+  private route = inject(ActivatedRoute);
 
-  login() {
-    const logged = this.auth.login(this.username.trim(), this.password.trim());
+  ngOnInit() {
+    // Added ngOnInit to check for error query parameter
+    this.route.queryParams.subscribe((params) => {
+      if (params["error"]) {
+        this.errormsg = params["error"]
+      }
+    })
+  }
+
+  async login() {
+    const logged = await this.auth.login(this.username.trim(), this.password.trim());
     if(logged){
       this.router.navigate(['/dashboard']);
       } else {

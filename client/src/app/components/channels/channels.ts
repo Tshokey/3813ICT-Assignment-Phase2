@@ -117,7 +117,7 @@ export class Channels {
       if (!this.user) return;
   
       if (this.auth.hasRole('SUPER_ADMIN') || (this.auth.hasRole('GROUP_ADMIN'))) {
-        this.channelService.removeMember(channel.name, username);
+        this.channelService.removeMember(channel.name, channel.groupName, username);
       } else {
         this.errormsg = "You don't have permission to remove members from this group.";
       }

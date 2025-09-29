@@ -17,3 +17,4 @@ export class Channel {
     }
 }
 
+export { Channel as Channels }
