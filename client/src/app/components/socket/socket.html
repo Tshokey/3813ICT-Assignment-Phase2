@@ -1,0 +1,79 @@
+<p>socket works!</p>
+<div class="socket-test-container">
+  <h2>Socket.IO Integration Test</h2>
+  
+  <div class="status-section">
+    <h3>Connection Status</h3>
+    <div class="status-indicator" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+      <span class="status-dot"></span>
+      {{ isConnected ? 'Connected' : 'Disconnected' }}
+    </div>
+    
+    <div class="button-group">
+      <button (click)="connect()" [disabled]="isConnected" class="btn btn-success">Connect</button>
+      <button (click)="disconnect()" [disabled]="!isConnected" class="btn btn-danger">Disconnect</button>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Channel Test</h3>
+    <div class="form-group">
+      <label>Channel Name:</label>
+      <input [(ngModel)]="testChannelName" class="form-control" placeholder="test-channel">
+    </div>
+    <div class="form-group">
+      <label>Group Name:</label>
+      <input [(ngModel)]="testGroupName" class="form-control" placeholder="test-group">
+    </div>
+    
+    <div class="button-group">
+      <button (click)="joinTestChannel()" [disabled]="!isConnected" class="btn btn-primary">Join Channel</button>
+      <button (click)="leaveTestChannel()" [disabled]="!isConnected" class="btn btn-warning">Leave Channel</button>
+    </div>
+  </div>
+
+  <div class="message-section">
+    <h3>Message Test</h3>
+    <div class="form-group">
+      <input [(ngModel)]="testMessage" 
+             (keypress)="$event.key === 'Enter' && sendTestMessage()"
+             class="form-control" 
+             placeholder="Type test message..."
+             [disabled]="!isConnected">
+      <button (click)="sendTestMessage()" 
+              [disabled]="!testMessage.trim() || !isConnected" 
+              class="btn btn-info">Send Message</button>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <div class="section-header">
+      <h3>Connection Log</h3>
+      <button (click)="clearLog()" class="btn btn-secondary btn-sm">Clear Log</button>
+    </div>
+    <div class="log-container">
+      <div *ngFor="let log of connectionLog" class="log-entry">{{ log }}</div>
+    </div>
+  </div>
+
+  <div class="messages-section">
+    <h3>Received Messages</h3>
+    <div class="messages-container">
+      <div *ngFor="let message of messages" class="message-entry">
+        <strong>{{ message.username }}:</strong> {{ message.message }}
+        <small class="timestamp">({{ message.timestamp | date:'short' }})</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-info">
+    <h4>Current User</h4>
+    <div *ngIf="currentUser; else noUser">
+      <p><strong>Username:</strong> {{ currentUser.username }}</p>
+      <p><strong>Roles:</strong> {{ currentUser.roles?.join(', ') || 'None' }}</p>
+    </div>
+    <ng-template #noUser>
+      <p class="text-warning">No user logged in</p>
+    </ng-template>
+  </div>
+</div>

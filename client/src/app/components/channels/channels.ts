@@ -21,6 +21,7 @@ export class Channels {
   errormsg: string = '';
   groups: any[] = [];
   groupAccessErr: string= '';
+  selectedChannel: Channel | null = null;
 
   constructor(
     public auth: AuthService, 
@@ -121,6 +122,14 @@ export class Channels {
       } else {
         this.errormsg = "You don't have permission to remove members from this group.";
       }
+  }
+
+  selectChannel(channel: Channel): void {
+    this.selectedChannel = channel
+  }
+
+  closeChat(): void {
+    this.selectedChannel = null
   }
 
 }
