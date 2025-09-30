@@ -1,52 +1,49 @@
-import { Component } from '@angular/core';
-import { RouterModule, Router, RouterLink } from '@angular/router';
-import { User } from '../../models/user';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from "@angular/core"
+import { RouterModule, Router, RouterLink } from "@angular/router"
+import { FormsModule } from "@angular/forms"
+import { AuthService } from "../../services/auth-service"
+import { firstValueFrom } from "rxjs"
+
 @Component({
-  selector: 'app-register',
+  selector: "app-register",
   imports: [RouterModule, FormsModule, RouterLink],
-  templateUrl: './register.html',
-  styleUrls: ['./register.css']
+  templateUrl: "./register.html",
+  styleUrls: ["./register.css"],
 })
 export class Register {
-  username: string = '';
-  email: string = '';
-  password: string = '';
-  errormsg: string = '';
+  username = ""
+  email = ""
+  password = ""
+  errormsg = ""
 
-  constructor(private router: Router){}
+  private router = inject(Router)
+  private authService = inject(AuthService)
 
-  register(){
-    if(!this.username.trim() || !this.email.trim() || !this.password.trim()) {
-      this.errormsg = 'All fields are required';
-      return;
-    }
-    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-
-    if(users.some((u: any) => u.email === this.email.trim())) {
-      this.errormsg = 'Email already registered';
-      return;
+  async register() {
+    if (!this.username.trim() || !this.email.trim() || !this.password.trim()) {
+      this.errormsg = "All fields are required"
+      return
     }
 
-    if(users.some((u: any) => u.username === this.username.trim())){
-      this.errormsg = 'Username already exists';
-      return;
+    try {
+      const response = await firstValueFrom(
+        this.authService.createUser({
+          username: this.username.trim(),
+          email: this.email.trim(),
+          password: this.password.trim(),
+          roles: ["USER"],
+          groups: [],
+        }),
+      )
+
+      if (response.success) {
+        this.router.navigate(["/login"])
+      } else {
+        this.errormsg = response.message || "Registration failed"
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      this.errormsg = error.error?.message || "Registration failed. Please try again."
     }
-
-    const newUser = new User(
-      users.length + 1,
-      this.username.trim(),
-      this.email.trim(),
-      this.password.trim(),
-      ['USER'],
-      []
-    );
-
-    users.push(newUser);
-
-    localStorage.setItem('users', JSON.stringify(users));
-
-    this.router.navigate(['/login']);
   }
 }
-

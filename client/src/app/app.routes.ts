@@ -15,7 +15,7 @@ export const routes: Routes = [
     {
         path: 'dashboard',
         component: Dashboard,
-        canActivate: [authGuard]
+        canActivate: [authGuard],
     }, 
     {
         path: 'login',
@@ -28,16 +28,16 @@ export const routes: Routes = [
     {
         path: 'groups',
         component: Groups,
-        canActivate: [authGuard]
+        canActivate: [authGuard],
     },
     {
         path: 'channels',
         component: Channels,
-        canActivate: [authGuard]
+        canActivate: [authGuard],
     },
     {
         path: 'admins',
         component: Admins,
-        canActivate: [authGuard]
+        canActivate: [authGuard],
     }
 ];

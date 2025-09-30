@@ -174,5 +174,3 @@ export class ChannelService {
     return this.http.get<any[]>(`${this.apiUrl}/reports`);
   }
 }
-
-  

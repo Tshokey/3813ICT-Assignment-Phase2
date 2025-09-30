@@ -1,16 +1,16 @@
-import {Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, AfterViewChecked} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { Sockets, ChatMessage } from "../../services/sockets";
+import {Component, OnInit, OnDestroy,  Input, ViewChild, ElementRef, AfterViewChecked} from "@angular/core"
+import { CommonModule } from "@angular/common"
+import { FormsModule } from "@angular/forms"
+import { Sockets, ChatMessage } from "../../services/sockets"
 import { AuthService } from "../../services/auth-service"
 import { HttpClient } from "@angular/common/http"
 import { Subscription, firstValueFrom } from "rxjs"
 
 @Component({
-  selector: 'app-chat',
+  selector: "app-chat",
   imports: [CommonModule, FormsModule],
-  templateUrl: './chat.html',
-  styleUrls: ['./chat.css']
+  templateUrl: "./chat.html",
+  styleUrls: ["./chat.css"],
 })
 export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   @Input() channelName = ""
@@ -24,6 +24,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
   private subscriptions: Subscription[] = []
   private shouldScrollToBottom = false
+  private messageIds = new Set<string>()
 
   constructor(
     private socketService: Sockets,
@@ -39,8 +40,10 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       return
     }
 
-    // Connect to socket
-    this.socketService.connect()
+    this.loadChatHistory().then(() => {
+      // Connect to socket after loading history
+      this.socketService.connect()
+    })
 
     // Subscribe to socket events
     this.subscriptions.push(
@@ -56,8 +59,17 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     this.subscriptions.push(
       this.socketService.getMessages().subscribe((message) => {
         console.log("[v0] Received message:", message)
-        this.messages.push(message)
-        this.shouldScrollToBottom = true
+
+        // Check if we already have this message (by ID or by checking if it's a duplicate)
+        const messageId = message._id || `${message.username}-${message.timestamp}`
+
+        if (!this.messageIds.has(messageId)) {
+          this.messageIds.add(messageId)
+          this.messages.push(message)
+          this.shouldScrollToBottom = true
+        } else {
+          console.log("[v0] Duplicate message ignored:", messageId)
+        }
       }),
     )
 
@@ -88,9 +100,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
         this.shouldScrollToBottom = true
       }),
     )
-
-    // Load chat history
-    this.loadChatHistory()
   }
 
   ngAfterViewChecked(): void {
@@ -120,9 +129,18 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       )
       console.log("[v0] Loaded chat history:", messages)
       this.messages = messages || []
+
+      this.messages.forEach((msg) => {
+        const messageId = msg._id || `${msg.username}-${msg.timestamp}`
+        this.messageIds.add(messageId)
+      })
+
       this.shouldScrollToBottom = true
     } catch (error) {
       console.error("[v0] Error loading chat history:", error)
+      if (error instanceof Error) {
+        console.error("[v0] Error details:", error.message)
+      }
       this.messages = []
     }
   }
@@ -136,10 +154,16 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.currentUser || !this.isConnected) {
+      console.log("[v0] Cannot send message:", {
+        hasMessage: !!this.newMessage.trim(),
+        hasUser: !!this.currentUser,
+        isConnected: this.isConnected,
+      })
       return
     }
 
     console.log("[v0] Sending message:", this.newMessage)
+
     this.socketService.sendMessage(this.channelName, this.groupName, this.currentUser.username, this.newMessage.trim())
 
     this.newMessage = ""

@@ -8,52 +8,65 @@
 
   <div *ngIf="errormsg" class="alert alert-danger">{{errormsg}}</div>
 
-  <div class="mb-2">
-    <label>Select Group:</label>
-    <select class="form-control" [(ngModel)]="selectedGroupName">
-      <option *ngFor="let g of groups" [value]="g.name">{{g.name}}</option>
-    </select>
+   Hide channel list when chat is open 
+  <div *ngIf="!selectedChannel">
+    <div class="mb-2">
+      <label>Select Group:</label>
+      <select class="form-control" [(ngModel)]="selectedGroupName">
+        <option *ngFor="let g of groups" [value]="g.name">{{g.name}}</option>
+      </select>
+    </div>
+
+    <div *ngIf="auth.hasRole('GROUP_ADMIN') || auth.hasRole('SUPER_ADMIN')">
+      <input [(ngModel)]="channelName" class="form-control" />
+      <button class="btn btn-primary mt-2" (click)="createChannel()">Create Channel</button>
+    </div>
+
+    <hr/>
+
+    <h3>Channels in Selected Group</h3>
+    <div *ngIf="groupAccessErr" class="alert alert-warning">
+      {{groupAccessErr}}
+    </div>
+    <ul class="list-group">
+      <ng-container *ngFor="let channel of visibleChannels">
+        <li class="list-group-item" *ngIf="channel.groupName === selectedGroupName">
+        <strong>{{channel.name}}</strong>
+        
+        <button *ngIf="user && !channel.members.includes(user!.username)" class="btn btn-sm btn-success ms-2" (click)="joinChannel(channel)">Join</button>
+        <button *ngIf="user && channel.members.includes(user!.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveChannel(channel)">Leave</button>
+         Add Open Chat button for members 
+        <button *ngIf="user && channel.members.includes(user!.username)" class="btn btn-sm btn-primary ms-2" (click)="selectChannel(channel)">Open Chat</button>
+        <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-danger ms-2" (click)="deleteChannel(channel)">Delete</button>
+
+        <div class="mt-3">
+          <strong>Members </strong>
+          <span *ngIf="channel.members.length; else noMembers">
+          </span>
+          <ng-template #noMembers>
+          <em>No members yet</em>
+          </ng-template>
+          <ul>
+            <li *ngFor="let m of channel.members" class="d-flex justify-content-between align-items-center">{{m}}
+              <div class="btn-group">
+                <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-danger ms-2" (click)="banUser(channel, m)"><small>Ban</small></button>
+                <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-warning ms-2" (click)="reportUser(channel, m, 'Misconduct')"><small>Report</small></button>
+                <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="checkbox-label ms-2" (click)="removeMember(channel, m)">Remove</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ng-container>
+    </ul>
   </div>
 
-  <div *ngIf="auth.hasRole('GROUP_ADMIN') || auth.hasRole('SUPER_ADMIN')">
-    <input [(ngModel)]="channelName" class="form-control" />
-    <button class="btn btn-primary mt-2" (click)="createChannel()">Create Channel</button>
+  Display chat component when a channel is selected 
+  <div *ngIf="selectedChannel">
+    <button class="btn btn-secondary mb-3" (click)="closeChat()">← Back to Channels</button>
+    <app-chat 
+      [channelName]="selectedChannel.name" 
+      [groupName]="selectedChannel.groupName">
+    </app-chat>
   </div>
-
-  <hr/>
-
-  <h3>Channels in Selected Group</h3>
-  <div *ngIf="groupAccessErr" class="alert alert-warning">
-    {{groupAccessErr}}
-  </div>
-  <ul class="list-group">
-    <ng-container *ngFor="let channel of visibleChannels">
-      <li class="list-group-item" *ngIf="channel.groupName === selectedGroupName">
-      <strong>{{channel.name}}</strong>
-      
-      <button *ngIf="user && !channel.members.includes(user!.username)" class="btn btn-sm btn-success ms-2" (click)="joinChannel(channel)">Join</button>
-      <button *ngIf="user && channel.members.includes(user!.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveChannel(channel)">Leave</button>
-      <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-danger ms-2" (click)="deleteChannel(channel)">Delete</button>
-
-      <div class="mt-3">
-        <strong>Members </strong>
-        <span *ngIf="channel.members.length; else noMembers">
-        </span>
-        <ng-template #noMembers>
-        <em>No members yet</em>
-        </ng-template>
-        <ul>
-          <li *ngFor="let m of channel.members" class="d-flex justify-content-between align-items-center">{{m}}
-            <div class="btn-group">
-              <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-danger ms-2" (click)="banUser(channel, m)"><small>Ban</small></button>
-              <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-outline-warning ms-2" (click)="reportUser(channel, m, 'Misconduct')"><small>Report</small></button>
-              <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="checkbox-label ms-2" (click)="removeMember(channel, m)">Remove</button>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </li>
-  </ng-container>
-  </ul>
-</div> 
-
+</div>

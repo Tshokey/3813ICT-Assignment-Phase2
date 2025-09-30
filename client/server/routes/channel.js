@@ -3,6 +3,11 @@ const express = require("express")
 module.exports = (appData, saveData) => {
   const router = express.Router()
 
+  if (!appData.messages) {
+    appData.messages = []
+    saveData(appData)
+  }
+
   // Get all channels
   router.get("/", (req, res) => {
     res.json(appData.channels)
@@ -13,6 +18,52 @@ module.exports = (appData, saveData) => {
     const { groupName } = req.params
     const channels = appData.channels.filter((c) => c.groupName === groupName)
     res.json(channels)
+  })
+
+  router.get("/:channelName/messages", (req, res) => {
+    const { channelName } = req.params
+    const { groupName } = req.query
+
+    if (!groupName) {
+      return res.status(400).json({ success: false, message: "Group name is required" })
+    }
+
+    if (!appData.messages) {
+      appData.messages = []
+    }
+
+    // Get messages for this specific channel and group
+    const messages = appData.messages
+      .filter((m) => m.channelName === channelName && m.groupName === groupName)
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      .slice(-50) // Return last 50 messages
+
+    res.json(messages)
+  })
+
+  router.post("/:channelName/messages", (req, res) => {
+    const { channelName } = req.params
+    const { groupName, username, message, messageType = "text", imageUrl = null } = req.body
+
+    if (!groupName || !username || !message) {
+      return res.status(400).json({ success: false, message: "Missing required fields" })
+    }
+
+    const newMessage = {
+      _id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      channelName,
+      groupName,
+      username,
+      message,
+      messageType,
+      imageUrl,
+      timestamp: new Date(),
+    }
+
+    appData.messages.push(newMessage)
+    saveData(appData)
+
+    res.json({ success: true, message: newMessage })
   })
 
   // Create channel
