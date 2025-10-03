@@ -8,7 +8,6 @@
 
   <div *ngIf="errormsg" class="alert alert-danger">{{errormsg}}</div>
 
-   Hide channel list when chat is open 
   <div *ngIf="!selectedChannel">
     <div class="mb-2">
       <label>Select Group:</label>
@@ -35,7 +34,6 @@
         
         <button *ngIf="user && !channel.members.includes(user!.username)" class="btn btn-sm btn-success ms-2" (click)="joinChannel(channel)">Join</button>
         <button *ngIf="user && channel.members.includes(user!.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveChannel(channel)">Leave</button>
-         Add Open Chat button for members 
         <button *ngIf="user && channel.members.includes(user!.username)" class="btn btn-sm btn-primary ms-2" (click)="selectChannel(channel)">Open Chat</button>
         <button *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')" class="btn btn-sm btn-danger ms-2" (click)="deleteChannel(channel)">Delete</button>
 
@@ -61,7 +59,6 @@
     </ul>
   </div>
 
-  Display chat component when a channel is selected 
   <div *ngIf="selectedChannel">
     <button class="btn btn-secondary mb-3" (click)="closeChat()">← Back to Channels</button>
     <app-chat 

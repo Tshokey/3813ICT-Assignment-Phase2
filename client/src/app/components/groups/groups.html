@@ -16,8 +16,10 @@
   <h3>All Groups</h3>
   <ul class="list-group">
     <li *ngFor="let group of groups" class="list-group-item ">
-      <h6><strong>{{group.name}}</strong></h6>
-      <small> (Group Admins: {{group.admins.join(', ')}})</small>
+      <strong>{{group.name}}</strong>
+        <button *ngIf="user && group.members.includes(user.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveGroup(group)">Leave</button>
+        <button *ngIf="user && (auth.hasRole('SUPER_ADMIN') || (auth.hasRole('GROUP_ADMIN') && group.createdBy === user.username))" class="btn btn-sm btn-danger ms-2" (click)="deleteGroup(group)">Delete</button>
+      <h6><small> (Group Admins: {{group.admins.join(', ')}})</small></h6>
 
       <div class="mt-1">
         <strong>Members </strong>
@@ -41,8 +43,7 @@
       <div class="mt-2">
         <button *ngIf="user && !group.members.includes(user.username) && !group.interested.includes(user.username)" class="btn btn-sm btn-success ms-2" (click)="registerInterest(group)">Join</button>
         <button *ngIf="user && group.interested.includes(user.username)" class="btn btn-sm btn-secondary me-2" disabled>Request Send</button>
-        <button *ngIf="user && group.members.includes(user.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveGroup(group)">Leave</button>
-        <button *ngIf="user && (auth.hasRole('SUPER_ADMIN') || (auth.hasRole('GROUP_ADMIN') && group.createdBy === user.username))" class="btn btn-sm btn-danger ms-2" (click)="deleteGroup(group)">Delete</button>
+
     </div>
 
     <div *ngIf="auth.hasRole('SUPER_ADMIN') || (user && group.admins.includes(user.username))" class="mt-2 ">

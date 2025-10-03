@@ -70,7 +70,7 @@
 
 .message {
   margin-bottom: 16px;
-  max-width: 70%;
+  max-width: 80%;
 }
 
 .message.own-message {
@@ -80,6 +80,52 @@
 .message.system-message {
   max-width: 100%;
   text-align: center;
+}
+
+/* Add avatar and message wrapper styles */
+.message-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.own-message .message-wrapper {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.message-bubble {
+  flex: 1;
+  min-width: 0;
 }
 
 .message-header {
@@ -166,6 +212,81 @@
 .message-input:disabled {
   background-color: #f8f9fa;
   color: #666;
+}
+
+/* Add image upload button styles */
+.image-button {
+  padding: 12px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-button:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.image-button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+.send-image-button {
+  background-color: #28a745;
+}
+
+.send-image-button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+/* Add image preview styles */
+.image-preview-container {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid #007bff;
+}
+
+.cancel-preview {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.cancel-preview:hover:not(:disabled) {
+  background-color: #c82333;
 }
 
 .send-button {

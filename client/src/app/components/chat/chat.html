@@ -1,11 +1,9 @@
 <div class="chat-container">
-  <!-- Connection Status -->
   <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
     <span class="status-indicator"></span>
     {{ isConnected ? 'Connected' : 'Disconnected' }}
   </div>
-
-  <!-- Chat Header -->
+ 
   <div class="chat-header">
     <h3>{{ channelName }} ({{ groupName }})</h3>
     <div class="user-info">
@@ -13,47 +11,109 @@
     </div>
   </div>
 
-  <!-- Messages Container -->
   <div class="messages-container" #messagesContainer>
     <div *ngFor="let message of messages" 
          class="message" 
          [class.own-message]="isOwnMessage(message)"
          [class.system-message]="isSystemMessage(message)">
       
-      <div class="message-header" *ngIf="!isSystemMessage(message)">
-        <span class="username">{{ message.username }}</span>
-        <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
-      </div>
-      
-      <div class="message-content">
-        <div *ngIf="message.messageType === 'text'" class="text-message">
-          {{ message.message }}
+      <div class="message-wrapper" *ngIf="!isSystemMessage(message)">
+        <div class="avatar" *ngIf="!isOwnMessage(message)">
+          <img *ngIf="getAvatarUrl(message.username)" 
+               [src]="getAvatarUrl(message.username)" 
+               [alt]="message.username"
+               class="avatar-image">
+          <div *ngIf="!getAvatarUrl(message.username)" class="avatar-placeholder">
+            {{ getUserInitial(message.username) }}
+          </div>
         </div>
-        
-        <div *ngIf="message.messageType === 'image'" class="image-message">
-          <img [src]="message.imageUrl" [alt]="message.message" class="message-image">
-          <div *ngIf="message.message" class="image-caption">{{ message.message }}</div>
+
+        <div class="message-bubble">
+          <div class="message-header">
+            <span class="username">{{ message.username }}</span>
+            <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+          </div>
+          
+          <div class="message-content">
+            <div *ngIf="message.messageType === 'text'" class="text-message">
+              {{ message.message }}
+            </div>
+            
+            <div *ngIf="message.messageType === 'image'" class="image-message">
+              <img [src]="'http://localhost:3000' + message.imageUrl" [alt]="message.message" class="message-image">
+              <div *ngIf="message.message" class="image-caption">{{ message.message }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="avatar" *ngIf="isOwnMessage(message)">
+          <img *ngIf="getAvatarUrl(message.username)" 
+               [src]="getAvatarUrl(message.username)" 
+               [alt]="message.username"
+               class="avatar-image">
+          <div *ngIf="!getAvatarUrl(message.username)" class="avatar-placeholder">
+            {{ getUserInitial(message.username) }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isSystemMessage(message)">
+        <div class="message-content">
+          <div class="text-message">
+            {{ message.message }}
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Message Input -->
+  <div class="image-preview-container" *ngIf="imagePreviewUrl">
+    <div class="image-preview">
+      <img [src]="imagePreviewUrl" alt="Preview">
+      <button class="cancel-preview" (click)="cancelImageUpload()" [disabled]="isUploadingImage">×</button>
+    </div>
+  </div>
+
   <div class="message-input-container">
     <div class="input-group">
+
+      <input 
+        type="file" 
+        #imageInput
+        (change)="onImageSelected($event)"
+        accept="image/*"
+        style="display: none">
+      
+      <button 
+        class="image-button"
+        (click)="triggerImageUpload()"
+        [disabled]="!isConnected || isUploadingImage"
+        title="Upload image">
+        📷
+      </button>
+
       <input 
         type="text" 
         [(ngModel)]="newMessage" 
         (keypress)="onKeyPress($event)"
-        placeholder="Type your message..."
+        [placeholder]="selectedImage ? 'Add a caption (optional)...' : 'Type your message...'"
         class="message-input"
-        [disabled]="!isConnected">
-      
+        [disabled]="!isConnected || isUploadingImage">
+
       <button 
+        *ngIf="!selectedImage"
         (click)="sendMessage()" 
         [disabled]="!newMessage.trim() || !isConnected"
         class="send-button">
         Send
+      </button>
+
+      <button 
+        *ngIf="selectedImage"
+        (click)="sendImageMessage()" 
+        [disabled]="!isConnected || isUploadingImage"
+        class="send-button send-image-button">
+        {{ isUploadingImage ? 'Uploading...' : 'Send Image' }}
       </button>
     </div>
   </div>

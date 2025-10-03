@@ -1,10 +1,11 @@
-import {Component, OnInit, OnDestroy,  Input, ViewChild, ElementRef, AfterViewChecked} from "@angular/core"
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, AfterViewChecked} from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { Sockets, ChatMessage } from "../../services/sockets"
 import { AuthService } from "../../services/auth-service"
 import { HttpClient } from "@angular/common/http"
 import { Subscription, firstValueFrom } from "rxjs"
+import { UploadService } from "../../services/upload-service"
 
 @Component({
   selector: "app-chat",
@@ -16,11 +17,16 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   @Input() channelName = ""
   @Input() groupName = ""
   @ViewChild("messagesContainer") messagesContainer!: ElementRef
+  @ViewChild("imageInput") imageInput!: ElementRef<HTMLInputElement>
 
   messages: ChatMessage[] = []
   newMessage = ""
   isConnected = false
   currentUser: any = null
+  selectedImage: File | null = null
+  imagePreviewUrl: string | null = null
+  isUploadingImage = false
+  userAvatars: Map<string, string> = new Map()
 
   private subscriptions: Subscription[] = []
   private shouldScrollToBottom = false
@@ -30,6 +36,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     private socketService: Sockets,
     private authService: AuthService,
     private http: HttpClient,
+    private uploadService: UploadService,
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +46,8 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       console.error("[v0] No current user found")
       return
     }
+
+    this.loadUserAvatars()
 
     this.loadChatHistory().then(() => {
       // Connect to socket after loading history
@@ -164,9 +173,94 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
     console.log("[v0] Sending message:", this.newMessage)
 
-    this.socketService.sendMessage(this.channelName, this.groupName, this.currentUser.username, this.newMessage.trim())
+    this.socketService.sendMessage(
+      this.channelName,
+      this.groupName,
+      this.currentUser.username,
+      this.newMessage.trim(),
+      "text",
+      undefined,
+    )
 
     this.newMessage = ""
+  }
+
+  triggerImageUpload(): void {
+    this.imageInput.nativeElement.click()
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    if (input.files && input.files[0]) {
+      const file = input.files[0]
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file")
+        return
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size must be less than 5MB")
+        return
+      }
+
+      this.selectedImage = file
+
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        this.imagePreviewUrl = e.target?.result as string
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  cancelImageUpload(): void {
+    this.selectedImage = null
+    this.imagePreviewUrl = null
+    if (this.imageInput) {
+      this.imageInput.nativeElement.value = ""
+    }
+  }
+
+  async sendImageMessage(): Promise<void> {
+    if (!this.selectedImage || !this.currentUser || !this.isConnected) {
+      return
+    }
+
+    this.isUploadingImage = true
+
+    try {
+      const response = await firstValueFrom(
+        this.uploadService.uploadChatImage(
+          this.selectedImage,
+          this.channelName,
+          this.newMessage.trim(), // Optional caption
+        ),
+      )
+
+      console.log("[v0] Image uploaded:", response)
+
+      this.socketService.sendMessage(
+        this.channelName,
+        this.groupName,
+        this.currentUser.username,
+        this.newMessage.trim() || "Sent an image",
+        "image",
+        response.data.imageUrl,
+      )
+
+      // Clear form
+      this.newMessage = ""
+      this.cancelImageUpload()
+    } catch (error) {
+      console.error("[v0] Error uploading image:", error)
+      alert("Failed to upload image. Please try again.")
+    } finally {
+      this.isUploadingImage = false
+    }
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -197,5 +291,31 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
   isOwnMessage(message: ChatMessage): boolean {
     return this.currentUser && message.username === this.currentUser.username
+  }
+
+  private async loadUserAvatars(): Promise<void> {
+    try {
+      const users = await firstValueFrom(this.authService.getUsers())
+      users.forEach((user) => {
+        if (user.profileImage) {
+          this.userAvatars.set(user.username, user.profileImage)
+        }
+      })
+      console.log("[v0] Loaded user avatars:", this.userAvatars)
+    } catch (error) {
+      console.error("[v0] Error loading user avatars:", error)
+    }
+  }
+
+  getAvatarUrl(username: string): string {
+    const profileImage = this.userAvatars.get(username)
+    if (profileImage) {
+      return `http://localhost:3000${profileImage}`
+    }
+    return "" // Will use default avatar
+  }
+
+  getUserInitial(username: string): string {
+    return username ? username.charAt(0).toUpperCase() : "?"
   }
 }
