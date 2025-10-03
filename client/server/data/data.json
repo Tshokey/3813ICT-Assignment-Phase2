@@ -8,7 +8,8 @@
       "roles": [
         "SUPER_ADMIN"
       ],
-      "groups": []
+      "groups": [],
+      "profileImage": "/userimages/profile-super-1759496146629.png"
     },
     {
       "id": 2,
@@ -29,6 +30,17 @@
         "USER"
       ],
       "groups": []
+    },
+    {
+      "id": 4,
+      "username": "e",
+      "email": "edf",
+      "password": "e",
+      "roles": [
+        "USER"
+      ],
+      "groups": [],
+      "profileImage": "/uploads/profiles/profile-1759217604629-927306893.png"
     }
   ],
   "groups": [
@@ -41,8 +53,19 @@
       "members": [
         "super",
         "s",
-        "t"
+        "e"
       ],
+      "channels": [],
+      "interested": [],
+      "bannedUsers": {}
+    },
+    {
+      "name": "B",
+      "createdBy": "super",
+      "admins": [
+        "super"
+      ],
+      "members": [],
       "channels": [],
       "interested": [],
       "bannedUsers": {}
@@ -67,12 +90,21 @@
       "members": [
         "super",
         "s",
-        "t"
+        "t",
+        "e"
       ],
       "bannedUsers": []
     },
     {
       "name": "t",
+      "groupName": "A",
+      "members": [
+        "e"
+      ],
+      "bannedUsers": []
+    },
+    {
+      "name": "d",
       "groupName": "A",
       "members": [],
       "bannedUsers": []
@@ -148,6 +180,66 @@
       "messageType": "text",
       "imageUrl": null,
       "timestamp": "2025-09-30T06:37:09.893Z"
+    },
+    {
+      "_id": "1759217689911q87z4p912",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "e",
+      "message": "Sent an image",
+      "messageType": "image",
+      "imageUrl": "/uploads/chat-images/chat-1759217689903-980895073.png",
+      "timestamp": "2025-09-30T07:34:49.911Z"
+    },
+    {
+      "_id": "175921771833929bbnvh5s",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "this",
+      "messageType": "image",
+      "imageUrl": "/uploads/chat-images/chat-1759217718330-682995312.png",
+      "timestamp": "2025-09-30T07:35:18.339Z"
+    },
+    {
+      "_id": "1759217735516elu77bci6",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "yi",
+      "messageType": "text",
+      "imageUrl": null,
+      "timestamp": "2025-09-30T07:35:35.516Z"
+    },
+    {
+      "_id": "1759217747596yjhjjj7vk",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "i mean this",
+      "messageType": "text",
+      "imageUrl": null,
+      "timestamp": "2025-09-30T07:35:47.596Z"
+    },
+    {
+      "_id": "1759217761663lpfn2ml94",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "Sent an image",
+      "messageType": "image",
+      "imageUrl": "/uploads/chat-images/chat-1759217761654-297279819.png",
+      "timestamp": "2025-09-30T07:36:01.663Z"
+    },
+    {
+      "_id": "17592177736741y00tnwy9",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "i mean this",
+      "messageType": "image",
+      "imageUrl": "/uploads/chat-images/chat-1759217773668-82601996.png",
+      "timestamp": "2025-09-30T07:36:13.674Z"
     }
   ]
 }
