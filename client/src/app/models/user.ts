@@ -1,29 +1,32 @@
-export type Role = 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'
+export type Role = "USER" | "GROUP_ADMIN" | "SUPER_ADMIN"
 
 export class User {
-    id: number;
-    username: string;
-    password: string;
-    email: string;
-    roles: Role[];
-    groups: string[];
+  id: number
+  username: string
+  password: string
+  email: string
+  roles: Role[]
+  groups: string[]
+  profileImage?: string | null
 
-    toPromoteGroup?: boolean = false;
-    toPromoteSuper?: boolean = false;
+  toPromoteGroup?: boolean = false
+  toPromoteSuper?: boolean = false
 
-    constructor(
-        id: number = 0, 
-        username: string='', 
-        email:string='', 
-        password:string='', 
-        roles:Role[]=[], 
-        groups:string[]=[])
-        {
-            this.id = id;
-            this.username = username;
-            this.password = password;
-            this.email = email;
-            this.roles = roles;
-            this.groups = groups;
-        }
-    }
+  constructor(
+    id = 0,
+    username = "",
+    email = "",
+    password = "",
+    roles: Role[] = [],
+    groups: string[] = [],
+    profileImage: string | null = null,
+  ) {
+    this.id = id
+    this.username = username
+    this.password = password
+    this.email = email
+    this.roles = roles
+    this.groups = groups
+    this.profileImage = profileImage
+  }
+}
