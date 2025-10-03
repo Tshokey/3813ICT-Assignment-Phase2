@@ -5,18 +5,23 @@ module.exports = (appData, saveData) => {
 
   if (!appData.messages) {
     appData.messages = []
-    saveData(appData)
+  }
+  if (!appData.channels) {
+    appData.channels = []
+  }
+  if (!appData.userReports) {
+    appData.userReports = []
   }
 
   // Get all channels
   router.get("/", (req, res) => {
-    res.json(appData.channels)
+    res.json(appData.channels || [])
   })
 
   // Get channels by group
   router.get("/group/:groupName", (req, res) => {
     const { groupName } = req.params
-    const channels = appData.channels.filter((c) => c.groupName === groupName)
+    const channels = (appData.channels || []).filter((c) => c.groupName === groupName)
     res.json(channels)
   })
 
@@ -49,6 +54,10 @@ module.exports = (appData, saveData) => {
       return res.status(400).json({ success: false, message: "Missing required fields" })
     }
 
+    if (!appData.messages) {
+      appData.messages = []
+    }
+
     const newMessage = {
       _id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       channelName,
@@ -69,6 +78,10 @@ module.exports = (appData, saveData) => {
   // Create channel
   router.post("/", (req, res) => {
     const { name, groupName, members = [], bannedUsers = [] } = req.body
+
+    if (!appData.channels) {
+      appData.channels = []
+    }
 
     // Check if channel already exists in the group
     if (appData.channels.find((c) => c.name.toLowerCase() === name.toLowerCase() && c.groupName === groupName)) {
@@ -93,6 +106,10 @@ module.exports = (appData, saveData) => {
     const { channelName } = req.params
     const { groupName, username } = req.body
 
+    if (!appData.channels) {
+      appData.channels = []
+    }
+
     const channel = appData.channels.find((c) => c.name === channelName && c.groupName === groupName)
     if (!channel) {
       return res.status(404).json({ success: false, message: "Channel not found" })
@@ -112,6 +129,10 @@ module.exports = (appData, saveData) => {
     const { channelName } = req.params
     const { groupName, username } = req.body
 
+    if (!appData.channels) {
+      appData.channels = []
+    }
+
     const channel = appData.channels.find((c) => c.name === channelName && c.groupName === groupName)
     if (!channel) {
       return res.status(404).json({ success: false, message: "Channel not found" })
@@ -126,6 +147,10 @@ module.exports = (appData, saveData) => {
   router.post("/:channelName/ban", (req, res) => {
     const { channelName } = req.params
     const { groupName, username } = req.body
+
+    if (!appData.channels) {
+      appData.channels = []
+    }
 
     const channel = appData.channels.find((c) => c.name === channelName && c.groupName === groupName)
     if (!channel) {
@@ -149,6 +174,10 @@ module.exports = (appData, saveData) => {
     const { channelName, username } = req.params
     const { groupName } = req.query
 
+    if (!appData.channels) {
+      appData.channels = []
+    }
+
     const channel = appData.channels.find((c) => c.name === channelName && c.groupName === groupName)
     if (!channel) {
       return res.status(404).json({ success: false, message: "Channel not found" })
@@ -164,6 +193,10 @@ module.exports = (appData, saveData) => {
     const { channelName } = req.params
     const { groupName } = req.query
 
+    if (!appData.channels) {
+      appData.channels = []
+    }
+
     const channelIndex = appData.channels.findIndex((c) => c.name === channelName && c.groupName === groupName)
     if (channelIndex === -1) {
       return res.status(404).json({ success: false, message: "Channel not found" })
@@ -178,6 +211,10 @@ module.exports = (appData, saveData) => {
   router.post("/:channelName/report", (req, res) => {
     const { channelName } = req.params
     const { groupName, username, reason, reportedBy } = req.body
+
+    if (!appData.userReports) {
+      appData.userReports = []
+    }
 
     const report = {
       groupName,
@@ -195,7 +232,7 @@ module.exports = (appData, saveData) => {
 
   // Get user reports
   router.get("/reports", (req, res) => {
-    res.json(appData.userReports)
+    res.json(appData.userReports || [])
   })
 
   return router
