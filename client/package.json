@@ -32,6 +32,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "formidable": "^3.5.4",
+    "mongodb": "^6.20.0",
     "multer": "^2.0.2",
     "peer": "^1.0.2",
     "peerjs": "^1.5.5",

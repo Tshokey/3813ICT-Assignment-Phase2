@@ -1,16 +1,13 @@
-const fs = require("fs")
-const path = require("path")
-
-const DATA_FILE = path.join(__dirname, "data", "data.json")
+const { getMessagesCollection } = require("./database/collections")
 
 module.exports = {
-  connect: (io, PORT, appData, saveData) => {
+  connect: (io, PORT, db) => {
+    const messagesCollection = db.collection("messages")
     const connectedPeers = new Map()
 
     io.on("connection", (socket) => {
       console.log(`User connected: ${socket.id}`)
 
-      // Join a channel room
       socket.on("join-channel", (data) => {
         const { channelName, groupName, username } = data
         const roomName = `${groupName}-${channelName}`
@@ -20,7 +17,6 @@ module.exports = {
 
         console.log(`${username} joined channel: ${roomName}`)
 
-        // Notify others in the channel
         socket.to(roomName).emit("user-joined", {
           username,
           message: `${username} joined the channel`,
@@ -34,7 +30,6 @@ module.exports = {
 
           console.log("[v0] Received send-message event:", { channelName, groupName, username, message })
 
-          // Validate required fields
           if (!channelName || !groupName || !username || !message) {
             const error = "Missing required fields"
             console.error("[v0]", error)
@@ -44,7 +39,6 @@ module.exports = {
           }
 
           const newMessage = {
-            _id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             channelName,
             groupName,
             username,
@@ -54,21 +48,16 @@ module.exports = {
             timestamp: new Date(),
           }
 
-          if (!appData.messages) {
-            appData.messages = []
-          }
-
-          appData.messages.push(newMessage)
-          saveData(appData)
+          const result = await messagesCollection.insertOne(newMessage)
+          newMessage._id = result.insertedId
 
           const roomName = `${groupName}-${channelName}`
 
           console.log("[v0] Broadcasting message to room:", roomName)
           console.log("[v0] Rooms socket is in:", Array.from(socket.rooms))
 
-          // Broadcast to all clients in the room (including sender)
           io.to(roomName).emit("new-message", {
-            _id: newMessage._id,
+            _id: newMessage._id.toString(),
             username,
             message,
             messageType,
@@ -78,7 +67,6 @@ module.exports = {
 
           console.log(`[v0] Message sent in ${roomName} by ${username}`)
 
-          // Send acknowledgment back to sender
           if (callback) {
             callback({ success: true, message: newMessage })
           }
@@ -92,13 +80,11 @@ module.exports = {
         }
       })
 
-      // Handle leaving channel
       socket.on("leave-channel", (data) => {
         const { channelName, groupName, username } = data
         const roomName = `${groupName}-${channelName}`
         socket.leave(roomName)
 
-        // Notify others in the channel
         socket.to(roomName).emit("user-left", {
           username,
           message: `${username} left the channel`,
@@ -108,7 +94,6 @@ module.exports = {
         console.log(`${username} left channel: ${roomName}`)
       })
 
-      // Handle video call signaling
       socket.on("video-call-request", (data) => {
         const { targetUser, channelName, groupName, callerName } = data
         const roomName = `${groupName}-${channelName}`
@@ -138,11 +123,9 @@ module.exports = {
 
         console.log(`[v0] Peer registered: ${username} (${peerId})`)
 
-        // Send current peer list to the new peer
         const peerList = Array.from(connectedPeers.values())
         socket.emit("peer-list", peerList)
 
-        // Notify all other peers about the new peer
         socket.broadcast.emit("new-peer", { peerId, username })
       })
 
@@ -151,12 +134,10 @@ module.exports = {
           connectedPeers.delete(peerId)
           console.log(`[v0] Peer unregistered: ${peerId}`)
 
-          // Notify all peers that this peer left
           io.emit("peer-left", peerId)
         }
       })
 
-      // Handle disconnect
       socket.on("disconnect", () => {
         console.log(`User disconnected: ${socket.id}`)
 
