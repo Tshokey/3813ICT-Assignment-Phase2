@@ -41,6 +41,27 @@
       ],
       "groups": [],
       "profileImage": "/uploads/profiles/profile-1759217604629-927306893.png"
+    },
+    {
+      "id": 5,
+      "username": "f",
+      "email": "f",
+      "password": "f",
+      "roles": [
+        "USER"
+      ],
+      "groups": [],
+      "profileImage": "/userimages/profile-f-1759552253535.png"
+    },
+    {
+      "id": 6,
+      "username": "v",
+      "email": "v",
+      "password": "v",
+      "roles": [
+        "USER"
+      ],
+      "groups": []
     }
   ],
   "groups": [
@@ -53,7 +74,9 @@
       "members": [
         "super",
         "s",
-        "e"
+        "e",
+        "f",
+        "v"
       ],
       "channels": [],
       "interested": [],
@@ -61,6 +84,17 @@
     },
     {
       "name": "B",
+      "createdBy": "super",
+      "admins": [
+        "super"
+      ],
+      "members": [],
+      "channels": [],
+      "interested": [],
+      "bannedUsers": {}
+    },
+    {
+      "name": "d",
       "createdBy": "super",
       "admins": [
         "super"
@@ -240,6 +274,26 @@
       "messageType": "image",
       "imageUrl": "/uploads/chat-images/chat-1759217773668-82601996.png",
       "timestamp": "2025-09-30T07:36:13.674Z"
+    },
+    {
+      "_id": "17595052102033l6pi37yn",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "super",
+      "message": "j",
+      "messageType": "text",
+      "imageUrl": null,
+      "timestamp": "2025-10-03T15:26:50.203Z"
+    },
+    {
+      "_id": "1759505361533ioutui4xk",
+      "channelName": "1",
+      "groupName": "A",
+      "username": "s",
+      "message": "k",
+      "messageType": "text",
+      "imageUrl": null,
+      "timestamp": "2025-10-03T15:29:21.533Z"
     }
   ]
 }

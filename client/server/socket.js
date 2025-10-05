@@ -5,6 +5,8 @@ const DATA_FILE = path.join(__dirname, "data", "data.json")
 
 module.exports = {
   connect: (io, PORT, appData, saveData) => {
+    const connectedPeers = new Map()
+
     io.on("connection", (socket) => {
       console.log(`User connected: ${socket.id}`)
 
@@ -129,9 +131,40 @@ module.exports = {
         io.to(targetId).emit("video-signal", { signal, senderId: socket.id })
       })
 
+      socket.on("register-peer", (data) => {
+        const { peerId, username } = data
+        connectedPeers.set(peerId, { peerId, username, socketId: socket.id })
+        socket.peerId = peerId
+
+        console.log(`[v0] Peer registered: ${username} (${peerId})`)
+
+        // Send current peer list to the new peer
+        const peerList = Array.from(connectedPeers.values())
+        socket.emit("peer-list", peerList)
+
+        // Notify all other peers about the new peer
+        socket.broadcast.emit("new-peer", { peerId, username })
+      })
+
+      socket.on("unregister-peer", (peerId) => {
+        if (connectedPeers.has(peerId)) {
+          connectedPeers.delete(peerId)
+          console.log(`[v0] Peer unregistered: ${peerId}`)
+
+          // Notify all peers that this peer left
+          io.emit("peer-left", peerId)
+        }
+      })
+
       // Handle disconnect
       socket.on("disconnect", () => {
         console.log(`User disconnected: ${socket.id}`)
+
+        if (socket.peerId && connectedPeers.has(socket.peerId)) {
+          connectedPeers.delete(socket.peerId)
+          io.emit("peer-left", socket.peerId)
+          console.log(`[v0] Peer removed on disconnect: ${socket.peerId}`)
+        }
 
         if (socket.currentRoom && socket.username) {
           socket.to(socket.currentRoom).emit("user-left", {

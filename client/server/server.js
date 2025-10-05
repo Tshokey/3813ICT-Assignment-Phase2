@@ -3,17 +3,55 @@ const cors = require("cors")
 const fs = require("fs")
 const path = require("path")
 const app = express()
-const http = require("http")
+const https = require("https")
+const { ExpressPeerServer } = require("peer")
 const socketIo = require("socket.io")
 const sockets = require("./socket.js")
 const listen = require("./listen.js")
 
-app.use(cors())
+const corsOptions = {
+  origin: ["http://localhost:4200", "https://localhost:4200"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}
+
+app.use(cors(corsOptions))
+
 app.use(express.json())
 
 app.use("/userimages", express.static(path.join(__dirname, "userimages")))
 
-const server = http.createServer(app)
+let server
+const certPath = path.join(__dirname, "cert.pem")
+const keyPath = path.join(__dirname, "key.pem")
+
+const useHTTP = process.env.USE_HTTP === "true"
+
+// Check if SSL certificates exist and USE_HTTP is not set
+if (!useHTTP && fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+  const options = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  }
+  server = https.createServer(options, app)
+  console.log("[v0] HTTPS server created with SSL certificates")
+} else {
+  // Fallback to HTTP if certificates don't exist or USE_HTTP is true
+  const http = require("http")
+  server = http.createServer(app)
+  if (useHTTP) {
+    console.log("[v0] HTTP server created (USE_HTTP=true)")
+  } else {
+    console.log("[v0] HTTP server created (SSL certificates not found)")
+  }
+  console.log("[v0] To enable HTTPS for video chat, generate SSL certificates:")
+  console.log("  openssl genrsa -out key.pem")
+  console.log("  openssl req -new -key key.pem -out csr.pem")
+  console.log("  openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem")
+  console.log("  rm csr.pem")
+}
 
 const DATA_FILE = path.join(__dirname, "data", "data.json")
 
@@ -23,7 +61,6 @@ function loadData() {
       const data = fs.readFileSync(DATA_FILE, "utf8")
       if (data) {
         const parsedData = JSON.parse(data)
-        // Merge with default data to ensure all required properties exist
         const defaultData = getDefaultData()
         return {
           users: parsedData.users || defaultData.users,
@@ -96,16 +133,35 @@ app.use("/api/groups", groupRoutes(appData, saveData))
 app.use("/api/channels", channelRoutes(appData, saveData))
 app.use("/api/upload", uploadRoutes(appData, saveData))
 
-const PORT = process.env.PORT || 3000
+app.get("/api/health", (req, res) => {
+  console.log("[v0] Health check endpoint called")
+  res.json({ status: "ok", message: "Server is running", timestamp: new Date().toISOString() })
+})
 
-const options = {
-  cors: {
-    origin: "http://localhost:4200",
-    methods: ["GET", "POST"],
-  },
-}
-const io = socketIo(server, options)
+const PORT = process.env.PORT || 3000
+const PEER_PORT = process.env.PEER_PORT || 3001
+
+const io = socketIo(server, {
+  cors: corsOptions,
+})
+
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+  path: "/", // Changed from "/peerjs" to "/" for proper mounting
+})
+
+app.use("/peerjs", peerServer) // Changed from "/" to "/peerjs" to avoid root path conflict
+
+peerServer.on("connection", (client) => {
+  console.log("[v0] Peer connected:", client.getId())
+})
+
+peerServer.on("disconnect", (client) => {
+  console.log("[v0] Peer disconnected:", client.getId())
+})
 
 sockets.connect(io, PORT, appData, saveData)
 
 listen.listen(server, PORT)
+
+console.log(`[v0] PeerServer is available at /peerjs on port ${PORT}`)
