@@ -20,16 +20,67 @@ export class Groups {
   /** reactive groups array */
   groups: Group[] = []
 
+  expandedGroups: Set<string> = new Set()
+  selectedMembers: Map<string, Set<string>> = new Map()
+
   constructor(
     public auth: AuthService,
     private groupService: GroupService,
   ) {
-    this.user = this.auth.getCurrentuser()
+    this.user = this.auth.getCurrentUser()
 
     // update local groups whenever the service signal changes
     effect(() => {
       this.groups = this.groupService.groups()
     })
+  }
+
+  toggleMembers(groupName: string): void {
+    if (this.expandedGroups.has(groupName)) {
+      this.expandedGroups.delete(groupName)
+      this.selectedMembers.delete(groupName)
+    } else {
+      this.expandedGroups.add(groupName)
+    }
+  }
+
+  isMembersExpanded(groupName: string): boolean {
+    return this.expandedGroups.has(groupName)
+  }
+
+  toggleMemberSelection(groupName: string, member: string): void {
+    if (!this.selectedMembers.has(groupName)) {
+      this.selectedMembers.set(groupName, new Set())
+    }
+    const members = this.selectedMembers.get(groupName)!
+    if (members.has(member)) {
+      members.delete(member)
+    } else {
+      members.add(member)
+    }
+  }
+
+  isMemberSelected(groupName: string, member: string): boolean {
+    return this.selectedMembers.get(groupName)?.has(member) || false
+  }
+
+  getSelectedMembers(groupName: string): string[] {
+    return Array.from(this.selectedMembers.get(groupName) || [])
+  }
+
+  async removeSelectedMembers(group: Group): Promise<void> {
+    const selected = this.getSelectedMembers(group.name)
+    if (selected.length === 0) return
+
+    const confirmMsg = `Are you sure you want to remove ${selected.length} member(s)?`
+    if (!confirm(confirmMsg)) return
+
+    for (const member of selected) {
+      await this.groupService.removeMember(group.name, member)
+    }
+
+    this.selectedMembers.delete(group.name)
+    this.errormsg = ""
   }
 
   createGroup(): void {

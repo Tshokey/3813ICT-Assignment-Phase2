@@ -28,6 +28,18 @@
         name="password"/>
     </div>
     
+     Added profile image upload section 
+    <div class="form-group">
+      <label>Profile Image (Optional)</label>
+      <input 
+        type="file" 
+        id="profileImageInput"
+        accept="image/*" 
+        (change)="onFileSelected($event)"
+        class="form-control"/>
+      <small class="form-text text-muted">Maximum file size: 5MB</small>
+      <p *ngIf="uploadMessage" class="text-danger mt-2">{{ uploadMessage }}</p>
+    </div>
 
     <button type="submit" class="btn btn-primary mt-2" (click)="register()">Register</button>
   </form>

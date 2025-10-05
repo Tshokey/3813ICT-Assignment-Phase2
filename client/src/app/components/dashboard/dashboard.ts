@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../../services/auth-service';
 import { RouterLink, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { User } from '../../models/user';
 import { UploadService } from '../../services/upload-service';
+
 
 @Component({
   selector: "app-dashboard",
@@ -12,6 +13,8 @@ import { UploadService } from '../../services/upload-service';
   styleUrls: ["./dashboard.css"],
 })
 export class Dashboard {
+  @ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>
+
   selectedFile: File | null = null
   uploadMessage = ""
   isUploading = false
@@ -22,11 +25,11 @@ export class Dashboard {
   ) {}
 
   get user(): User | null {
-    return this.auth.getCurrentuser()
+    return this.auth.getCurrentUser()
   }
 
   get isLoggedIn(): boolean {
-    return this.auth.isloggedIn()
+    return this.auth.isLoggedIn()
   }
 
   logout() {
@@ -39,6 +42,10 @@ export class Dashboard {
 
   get isGroupAdmin() {
     return this.auth.hasRole("GROUP_ADMIN")
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click()
   }
 
   onFileSelected(event: Event): void {
@@ -60,6 +67,7 @@ export class Dashboard {
 
       this.selectedFile = file
       this.uploadMessage = ""
+      this.uploadProfileImage()
     }
   }
 
@@ -83,9 +91,8 @@ export class Dashboard {
           this.uploadMessage = "Profile image updated successfully!"
           this.selectedFile = null
           // Reset file input
-          const fileInput = document.getElementById("profileImageInput") as HTMLInputElement
-          if (fileInput) {
-            fileInput.value = ""
+          if (this.fileInput) {
+            this.fileInput.nativeElement.value = ""
           }
         } else {
           this.uploadMessage = "Upload failed: " + response.message
@@ -111,3 +118,4 @@ export class Dashboard {
     return !!this.user?.profileImage
   }
 }
+

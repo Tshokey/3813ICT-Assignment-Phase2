@@ -4,7 +4,7 @@
     <div *ngIf="isLoggedIn && user" class="card">
         <div class="card-header">
             <div class="profile-section">
-                <div class="profile-image-container">
+                <div class="profile-image-container" style="cursor: pointer;" (click)="triggerFileInput()" title="Click to change profile picture">
                     <img 
                         *ngIf="hasProfileImage()" 
                         [src]="getProfileImageUrl()" 
@@ -13,6 +13,9 @@
                     <div *ngIf="!hasProfileImage()" class="profile-placeholder">
                         <span>{{ user.username.charAt(0).toUpperCase() }}</span>
                     </div>
+                    <div class="profile-overlay">
+                        <span>Change Photo</span>
+                    </div>
                 </div>
                 <div class="profile-info">
                     <p>Welcome, <strong>{{user.username}}</strong>!</p>
@@ -20,29 +23,19 @@
                 </div>
             </div>
 
-            <div class="profile-upload-section">
-                <h4>Profile Image</h4>
-                <div class="upload-controls">
-                    <input 
-                        type="file" 
-                        id="profileImageInput"
-                        accept="image/*" 
-                        (change)="onFileSelected($event)"
-                        class="file-input">
-                    <button 
-                        *ngIf="selectedFile" 
-                        (click)="uploadProfileImage()" 
-                        [disabled]="isUploading"
-                        class="btn btn-primary">
-                        {{ isUploading ? 'Uploading...' : 'Upload Image' }}
-                    </button>
-                </div>
-                <p *ngIf="uploadMessage" class="upload-message" 
-                   [class.success]="uploadMessage.includes('success')"
-                   [class.error]="!uploadMessage.includes('success')">
-                    {{ uploadMessage }}
-                </p>
-            </div>
+            <input 
+                type="file" 
+                #fileInput
+                id="profileImageInput"
+                accept="image/*" 
+                (change)="onFileSelected($event)"
+                style="display: none;">
+            
+            <p *ngIf="uploadMessage" class="upload-message mt-2" 
+               [class.text-success]="uploadMessage.includes('success')"
+               [class.text-danger]="!uploadMessage.includes('success')">
+                {{ uploadMessage }}
+            </p>
         </div>
 
         <div class="card-body">

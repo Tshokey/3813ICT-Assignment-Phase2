@@ -1,23 +1,22 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../services/auth-service';
-import { FormsModule } from '@angular/forms';
-
+import { Component, inject, type OnInit } from "@angular/core"
+import { Router, ActivatedRoute, RouterLink } from "@angular/router"
+import { AuthService } from "../../services/auth-service"
+import { FormsModule } from "@angular/forms"
 
 @Component({
-  selector: 'app-login',
-  imports: [FormsModule],
-  templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  selector: "app-login",
+  imports: [FormsModule, RouterLink],
+  templateUrl: "./login.html",
+  styleUrls: ["./login.css"],
 })
-export class Login implements OnInit{
-  username = '';
-  password = '';
-  errormsg = '';
+export class Login implements OnInit {
+  username = ""
+  password = ""
+  errormsg = ""
 
-  private router = inject(Router); 
+  private router = inject(Router)
   private auth = inject(AuthService)
-  private route = inject(ActivatedRoute);
+  private route = inject(ActivatedRoute)
 
   ngOnInit() {
     // Added ngOnInit to check for error query parameter
@@ -29,13 +28,11 @@ export class Login implements OnInit{
   }
 
   async login() {
-    const logged = await this.auth.login(this.username.trim(), this.password.trim());
-    if(logged){
-      this.router.navigate(['/dashboard']);
-      } else {
-        this.errormsg = 'Invalid username or password';
-      }
-      
+    const logged = await this.auth.login(this.username.trim(), this.password.trim())
+    if (logged) {
+      this.router.navigate(["/dashboard"])
+    } else {
+      this.errormsg = "Invalid username or password"
     }
-    
   }
+}

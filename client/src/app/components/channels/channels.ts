@@ -24,12 +24,15 @@ export class Channels {
   groupAccessErr = ""
   selectedChannel: Channel | null = null
 
+  expandedChannels: Set<string> = new Set()
+  selectedMembers: Map<string, Set<string>> = new Map()
+
   constructor(
     public auth: AuthService,
     private channelService: ChannelService,
     private groupService: GroupService,
   ) {
-    this.user = this.auth.getCurrentuser()
+    this.user = this.auth.getCurrentUser()
 
     const savedGroups = localStorage.getItem("groups")
     this.groups = this.groupService.groups()
@@ -37,6 +40,54 @@ export class Channels {
     effect(() => {
       this.channels = this.channelService.allChannels()
     })
+  }
+
+  toggleMembers(channelName: string): void {
+    if (this.expandedChannels.has(channelName)) {
+      this.expandedChannels.delete(channelName)
+      this.selectedMembers.delete(channelName)
+    } else {
+      this.expandedChannels.add(channelName)
+    }
+  }
+
+  isMembersExpanded(channelName: string): boolean {
+    return this.expandedChannels.has(channelName)
+  }
+
+  toggleMemberSelection(channelName: string, member: string): void {
+    if (!this.selectedMembers.has(channelName)) {
+      this.selectedMembers.set(channelName, new Set())
+    }
+    const members = this.selectedMembers.get(channelName)!
+    if (members.has(member)) {
+      members.delete(member)
+    } else {
+      members.add(member)
+    }
+  }
+
+  isMemberSelected(channelName: string, member: string): boolean {
+    return this.selectedMembers.get(channelName)?.has(member) || false
+  }
+
+  getSelectedMembers(channelName: string): string[] {
+    return Array.from(this.selectedMembers.get(channelName) || [])
+  }
+
+  async removeSelectedMembers(channel: Channel): Promise<void> {
+    const selected = this.getSelectedMembers(channel.name)
+    if (selected.length === 0) return
+
+    const confirmMsg = `Are you sure you want to remove ${selected.length} member(s)?`
+    if (!confirm(confirmMsg)) return
+
+    for (const member of selected) {
+      await this.channelService.removeMember(channel.name, channel.groupName, member)
+    }
+
+    this.selectedMembers.delete(channel.name)
+    this.errormsg = ""
   }
 
   get visibleChannels(): Channel[] {

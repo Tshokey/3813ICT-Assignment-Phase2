@@ -1,0 +1,103 @@
+<div class="video-chat-container">
+  <div class="header">
+    <h2>Video Chat</h2>
+    <div class="peer-info">
+      <span class="badge bg-primary">My Peer ID: {{ myPeerId || 'Connecting...' }}</span>
+    </div>
+  </div>
+
+  <div class="video-section">
+     My Video 
+    <div class="my-video-container">
+      <h4>My Video</h4>
+      <video
+        #myVideo
+        autoplay
+        muted
+        playsinline
+        class="video-element"
+      ></video>
+      
+      <div class="video-controls">
+        <button
+          class="btn btn-sm"
+          [class.btn-danger]="!isVideoEnabled"
+          [class.btn-success]="isVideoEnabled"
+          (click)="toggleVideo()"
+        >
+          {{ isVideoEnabled ? '📹 Video On' : '📹 Video Off' }}
+        </button>
+        
+        <button
+          class="btn btn-sm"
+          [class.btn-danger]="!isAudioEnabled"
+          [class.btn-success]="isAudioEnabled"
+          (click)="toggleAudio()"
+        >
+          {{ isAudioEnabled ? '🎤 Mic On' : '🎤 Mic Off' }}
+        </button>
+        
+        <button
+          class="btn btn-sm btn-info"
+          (click)="startCamera()"
+          [disabled]="!isScreenSharing"
+        >
+          📷 Camera
+        </button>
+        
+        <button
+          class="btn btn-sm btn-warning"
+          (click)="startScreenShare()"
+        >
+          🖥️ Share Screen
+        </button>
+      </div>
+    </div>
+
+     Available Peers 
+    <div class="peers-container">
+      <h4>Available Peers ({{ availablePeers.length }})</h4>
+      <div class="peers-list">
+        <div
+          *ngFor="let peer of availablePeers; trackBy: trackByPeerId"
+          class="peer-item"
+        >
+          <span class="peer-name">{{ peer.username }}</span>
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="callPeer(peer)"
+          >
+            📞 Call
+          </button>
+        </div>
+        
+        <div *ngIf="availablePeers.length === 0" class="no-peers">
+          No other peers available. Share your peer ID with others to connect.
+        </div>
+      </div>
+    </div>
+  </div>
+
+   Remote Videos 
+  <div class="remote-videos-section">
+    <h4>Connected Peers ({{ videoStreams.length }})</h4>
+    <div class="remote-videos-grid">
+      <div
+        *ngFor="let videoStream of videoStreams; trackBy: trackByStreamPeerId"
+        class="remote-video-container"
+      >
+        <h5>{{ videoStream.username }}</h5>
+        <video
+          [srcObject]="videoStream.stream"
+          autoplay
+          playsinline
+          class="video-element"
+        ></video>
+      </div>
+      
+      <div *ngIf="videoStreams.length === 0" class="no-videos">
+        No active video calls. Click "Call" on a peer to start.
+      </div>
+    </div>
+  </div>
+</div>

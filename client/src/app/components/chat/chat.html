@@ -1,16 +1,118 @@
 <div class="chat-container">
+  <!-- Connection Status -->
   <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
     <span class="status-indicator"></span>
     {{ isConnected ? 'Connected' : 'Disconnected' }}
   </div>
- 
+
+  <!-- Chat Header -->
   <div class="chat-header">
     <h3>{{ channelName }} ({{ groupName }})</h3>
-    <div class="user-info">
-      <span>{{ currentUser?.username }}</span>
+    <div class="header-actions">
+      <!-- Updated video chat button to toggle video panel -->
+      <button 
+        class="video-chat-button"
+        [class.active]="isVideoCallActive"
+        (click)="startVideoChat()"
+        [disabled]="!isConnected"
+        title="Toggle video chat">
+        🎥 {{ isVideoCallActive ? 'End Video' : 'Start Video' }}
+      </button>
+      <div class="user-info">
+        <span>{{ currentUser?.username }}</span>
+      </div>
     </div>
   </div>
 
+  <!-- Added video chat panel overlay -->
+  <div class="video-chat-overlay" *ngIf="isVideoCallActive">
+    <div class="video-chat-panel">
+      <div class="video-panel-header">
+        <h4>Video Chat</h4>
+        <button class="close-video-btn" (click)="startVideoChat()">×</button>
+      </div>
+
+      <!-- My Video -->
+      <div class="my-video-section">
+        <video
+          #myVideo
+          autoplay
+          muted
+          playsinline
+          class="my-video-element"
+        ></video>
+        
+        <div class="video-controls">
+          <button
+            class="control-btn"
+            [class.btn-off]="!isVideoEnabled"
+            (click)="toggleVideo()"
+            title="Toggle video">
+            {{ isVideoEnabled ? '📹' : '📹❌' }}
+          </button>
+          
+          <button
+            class="control-btn"
+            [class.btn-off]="!isAudioEnabled"
+            (click)="toggleAudio()"
+            title="Toggle audio">
+            {{ isAudioEnabled ? '🎤' : '🎤❌' }}
+          </button>
+          
+          <button
+            class="control-btn"
+            (click)="startScreenShare()"
+            title="Share screen">
+            🖥️
+          </button>
+        </div>
+      </div>
+
+      <!-- Available Peers -->
+      <div class="peers-section">
+        <h5>Available ({{ availablePeers.length }})</h5>
+        <div class="peers-list">
+          <div
+            *ngFor="let peer of availablePeers; trackBy: trackByPeerId"
+            class="peer-item"
+          >
+            <span class="peer-name">{{ peer.username }}</span>
+            <button
+              class="call-btn"
+              (click)="callPeer(peer)"
+            >
+              📞
+            </button>
+          </div>
+          
+          <div *ngIf="availablePeers.length === 0" class="no-peers">
+            No peers available
+          </div>
+        </div>
+      </div>
+
+      <!-- Remote Videos -->
+      <div class="remote-videos-section" *ngIf="videoStreams.length > 0">
+        <h5>Connected ({{ videoStreams.length }})</h5>
+        <div class="remote-videos-grid">
+          <div
+            *ngFor="let videoStream of videoStreams; trackBy: trackByStreamPeerId"
+            class="remote-video-item"
+          >
+            <span class="remote-username">{{ videoStream.username }}</span>
+            <video
+              [srcObject]="videoStream.stream"
+              autoplay
+              playsinline
+              class="remote-video-element"
+            ></video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
   <div class="messages-container" #messagesContainer>
     <div *ngFor="let message of messages" 
          class="message" 
@@ -67,6 +169,7 @@
     </div>
   </div>
 
+  <!-- Image Preview (if image selected) -->
   <div class="image-preview-container" *ngIf="imagePreviewUrl">
     <div class="image-preview">
       <img [src]="imagePreviewUrl" alt="Preview">
@@ -74,9 +177,10 @@
     </div>
   </div>
 
+  <!-- Message Input -->
   <div class="message-input-container">
     <div class="input-group">
-
+      <!-- Hidden file input -->
       <input 
         type="file" 
         #imageInput
@@ -84,6 +188,7 @@
         accept="image/*"
         style="display: none">
       
+      <!-- Image upload button -->
       <button 
         class="image-button"
         (click)="triggerImageUpload()"
@@ -99,7 +204,8 @@
         [placeholder]="selectedImage ? 'Add a caption (optional)...' : 'Type your message...'"
         class="message-input"
         [disabled]="!isConnected || isUploadingImage">
-
+      
+      <!-- Send button changes based on whether image is selected -->
       <button 
         *ngIf="!selectedImage"
         (click)="sendMessage()" 

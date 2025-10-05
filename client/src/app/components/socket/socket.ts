@@ -26,7 +26,7 @@ export class Socket implements OnInit, OnDestroy {
   private authService = inject (AuthService);
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentuser();
+    this.currentUser = this.authService.getCurrentUser();
     this.addLog("Component initialized");
 
     // Subscribe to connection status

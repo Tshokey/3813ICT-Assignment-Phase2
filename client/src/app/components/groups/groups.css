@@ -1,0 +1,36 @@
+/* Added styles for collapsible members and multi-select UI */
+.members-section {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+}
+
+.member-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-item label {
+  cursor: pointer;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.member-item input[type="checkbox"] {
+  cursor: pointer;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.group-actions {
+  margin-left: 1rem;
+}
+
+.list-group-item {
+  position: relative;
+}
