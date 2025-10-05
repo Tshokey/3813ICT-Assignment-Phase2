@@ -5,47 +5,46 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class ChannelService {
-
-  private http = inject(HttpClient);
-  private channels = signal<Channel[]>([]);
-  private apiUrl = "http://localhost:3000/api/channels";
+  private http = inject(HttpClient)
+  private channels = signal<Channel[]>([])
+  private apiUrl = "https://localhost:3000/api/channels"
 
   constructor(private auth: AuthService) {
-    this.loadChannels();
+    this.loadChannels()
   }
 
   get allChannels(): Signal<Channel[]> {
-    return this.channels.asReadonly();
+    return this.channels.asReadonly()
   }
 
   private async loadChannels() {
     try {
-      const channels = await firstValueFrom(this.http.get<Channel[]>(this.apiUrl));
-      this.channels.set(channels);
+      const channels = await firstValueFrom(this.http.get<Channel[]>(this.apiUrl))
+      this.channels.set(channels)
     } catch (error) {
-      console.error("Error loading channels:", error);
+      console.error("Error loading channels:", error)
     }
   }
 
   async createChannel(ch: Channel): Promise<boolean> {
-    try{
+    try {
       const response = await firstValueFrom(
         this.http.post<{ success: boolean; channel?: Channel; message?: string }>(this.apiUrl, ch),
       )
 
       if (response.success && response.channel) {
-        const channels = this.channels();
-        channels.push(response.channel);
-        this.channels.set(channels);
-        return true;
+        const channels = this.channels()
+        channels.push(response.channel)
+        this.channels.set(channels)
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error creating channel:", error);
-      return false;
+      console.error("Error creating channel:", error)
+      return false
     }
   }
 
@@ -59,13 +58,13 @@ export class ChannelService {
       )
 
       if (response.success) {
-        await this.loadChannels(); // Refresh channels
-        return true;
+        await this.loadChannels() // Refresh channels
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error joining channel:", error);
-      return false;
+      console.error("Error joining channel:", error)
+      return false
     }
   }
 
@@ -79,13 +78,13 @@ export class ChannelService {
       )
 
       if (response.success) {
-        await this.loadChannels(); // Refresh channels
-        return true;
+        await this.loadChannels() // Refresh channels
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error leaving channel:", error);
-      return false;
+      console.error("Error leaving channel:", error)
+      return false
     }
   }
 
@@ -98,14 +97,14 @@ export class ChannelService {
       )
 
       if (response.success) {
-        const channels = this.channels().filter((c) => !(c.name === channelName && c.groupName === groupName));
-        this.channels.set(channels);
-        return true;
+        const channels = this.channels().filter((c) => !(c.name === channelName && c.groupName === groupName))
+        this.channels.set(channels)
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error deleting channel:", error);
-      return false;
+      console.error("Error deleting channel:", error)
+      return false
     }
   }
 
@@ -119,13 +118,13 @@ export class ChannelService {
       )
 
       if (response.success) {
-        await this.loadChannels(); // Refresh channels
-        return true;
+        await this.loadChannels() // Refresh channels
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error banning user:", error);
-      return false;
+      console.error("Error banning user:", error)
+      return false
     }
   }
 
@@ -136,14 +135,14 @@ export class ChannelService {
           groupName,
           username,
           reason,
-          reportedBy: this.auth.getCurrentuser()?.username,
+          reportedBy: this.auth.getCurrentUser()?.username,
         }),
       )
 
-      return response.success;
+      return response.success
     } catch (error) {
-      console.error("Error reporting user:", error);
-      return false; 
+      console.error("Error reporting user:", error)
+      return false
     }
   }
 
@@ -156,21 +155,21 @@ export class ChannelService {
       )
 
       if (response.success) {
-        await this.loadChannels(); // Refresh channels
-        return true;
+        await this.loadChannels() // Refresh channels
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error removing member:", error);
-      return false;
+      console.error("Error removing member:", error)
+      return false
     }
   }
 
   getChannelsByGroup(groupName: string): Observable<Channel[]> {
-    return this.http.get<Channel[]>(`${this.apiUrl}/group/${groupName}`);
+    return this.http.get<Channel[]>(`${this.apiUrl}/group/${groupName}`)
   }
 
   getUserReports(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/reports`);
+    return this.http.get<any[]>(`${this.apiUrl}/reports`)
   }
 }

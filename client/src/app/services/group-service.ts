@@ -4,26 +4,26 @@ import { AuthService } from './auth-service';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class GroupService {
-  private http = inject(HttpClient);
-  private _groups = signal<Group[]>([]);
-  private apiUrl = "http://localhost:3000/api/groups";
+  private http = inject(HttpClient)
+  private _groups = signal<Group[]>([])
+  private apiUrl = "https://localhost:3000/api/groups"
 
   constructor(private auth: AuthService) {
-    this.loadGroups();
+    this.loadGroups()
   }
 
   get groups(): Signal<Group[]> {
-    return this._groups.asReadonly();
+    return this._groups.asReadonly()
   }
 
   private async loadGroups() {
     try {
-      const groups = await firstValueFrom(this.http.get<Group[]>(this.apiUrl));
-      this._groups.set(groups);
+      const groups = await firstValueFrom(this.http.get<Group[]>(this.apiUrl))
+      this._groups.set(groups)
     } catch (error) {
-      console.error("Error loading groups:", error);
+      console.error("Error loading groups:", error)
     }
   }
 
@@ -34,15 +34,15 @@ export class GroupService {
       )
 
       if (response.success && response.group) {
-        const groups = this._groups();
-        groups.push(response.group);
-        this._groups.set(groups);
-        return true;
+        const groups = this._groups()
+        groups.push(response.group)
+        this._groups.set(groups)
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error creating group:", error);
-      return false;
+      console.error("Error creating group:", error)
+      return false
     }
   }
 
@@ -53,13 +53,13 @@ export class GroupService {
       )
 
       if (response.success) {
-        await this.loadGroups(); // Refresh groups
-        return true;
+        await this.loadGroups() // Refresh groups
+        return true
       }
-      return false;
+      return false
     } catch (error) {
       console.error("Error sending join request:", error)
-      return false;
+      return false
     }
   }
 
@@ -70,13 +70,13 @@ export class GroupService {
       )
 
       if (response.success) {
-        await this.loadGroups(); // Refresh groups
-        return true;
+        await this.loadGroups() // Refresh groups
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error approving user:", error);
-      return false;
+      console.error("Error approving user:", error)
+      return false
     }
   }
 
@@ -87,13 +87,13 @@ export class GroupService {
       )
 
       if (response.success) {
-        await this.loadGroups(); // Refresh groups
-        return true;
+        await this.loadGroups() // Refresh groups
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error rejecting user:", error);
-      return false;
+      console.error("Error rejecting user:", error)
+      return false
     }
   }
 
@@ -104,13 +104,13 @@ export class GroupService {
       )
 
       if (response.success) {
-        await this.loadGroups(); // Refresh groups
-        return true;
+        await this.loadGroups() // Refresh groups
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error leaving group:", error);
-      return false;
+      console.error("Error leaving group:", error)
+      return false
     }
   }
 
@@ -121,14 +121,14 @@ export class GroupService {
       )
 
       if (response.success) {
-        const groups = this._groups().filter((g) => g.name !== groupName);
-        this._groups.set(groups);
-        return true;
+        const groups = this._groups().filter((g) => g.name !== groupName)
+        this._groups.set(groups)
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error deleting group:", error);
-      return false;
+      console.error("Error deleting group:", error)
+      return false
     }
   }
 
@@ -139,13 +139,13 @@ export class GroupService {
       )
 
       if (response.success) {
-        await this.loadGroups(); // Refresh groups
-        return true;
+        await this.loadGroups() // Refresh groups
+        return true
       }
-      return false;
+      return false
     } catch (error) {
-      console.error("Error removing member:", error);
-      return false;
+      console.error("Error removing member:", error)
+      return false
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
-import { io, type Socket } from "socket.io-client"
-import { type Observable, Subject } from "rxjs"
+import { io, Socket } from "socket.io-client"
+import { Observable, Subject } from "rxjs"
 
 export interface ChatMessage {
   _id?: string
@@ -28,7 +28,7 @@ export class Sockets {
   private connectionStatusSubject = new Subject<boolean>()
 
   constructor() {
-    this.socket = io("http://localhost:3000", {
+    this.socket = io("https://localhost:3000", {
       autoConnect: false,
       reconnection: true,
       reconnectionDelay: 1000,
