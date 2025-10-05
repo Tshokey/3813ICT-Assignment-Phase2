@@ -3,16 +3,15 @@ const formidable = require("formidable")
 const path = require("path")
 const fs = require("fs")
 
-module.exports = (appData, saveData) => {
-  const router = express.Router()
-
+module.exports = (db, app) => {
+  const usersCollection = db.collection("users")
   const uploadFolder = path.join(__dirname, "..", "userimages")
 
   if (!fs.existsSync(uploadFolder)) {
     fs.mkdirSync(uploadFolder, { recursive: true })
   }
 
-  router.post("/profile-image", (req, res) => {
+  app.post("/api/upload/profile-image", (req, res) => {
     const form = new formidable.IncomingForm()
     form.uploadDir = uploadFolder
     form.keepExtensions = true
@@ -57,7 +56,7 @@ module.exports = (appData, saveData) => {
       const filename = `profile-${username}-${Date.now()}${fileExt}`
       const newpath = path.join(uploadFolder, filename)
 
-      fs.rename(oldpath, newpath, (err) => {
+      fs.rename(oldpath, newpath, async (err) => {
         if (err) {
           console.log("Error renaming file")
           return res.status(400).json({
@@ -69,42 +68,49 @@ module.exports = (appData, saveData) => {
 
         const imageUrl = `/userimages/${filename}`
 
-        // Update user's profile image in appData
-        const user = appData.users.find((u) => u.username === username)
-        if (!user) {
-          return res.status(404).json({
+        try {
+          const user = await usersCollection.findOne({ username })
+
+          if (!user) {
+            return res.status(404).json({
+              status: "Fail",
+              message: "User not found",
+            })
+          }
+
+          // Delete old profile image if it exists
+          if (user.profileImage) {
+            const oldImagePath = path.join(__dirname, "..", user.profileImage)
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath)
+            }
+          }
+
+          await usersCollection.updateOne({ username }, { $set: { profileImage: imageUrl, updatedAt: new Date() } })
+
+          res.send({
+            result: "OK",
+            data: {
+              filename: filename,
+              size: imageFile.size,
+              imageUrl: imageUrl,
+            },
+            numberOfImages: 1,
+            message: "upload successful",
+          })
+        } catch (dbError) {
+          console.error("Database error:", dbError)
+          return res.status(500).json({
             status: "Fail",
-            message: "User not found",
+            message: "Database error",
+            error: dbError,
           })
         }
-
-        // Delete old profile image if it exists
-        if (user.profileImage) {
-          const oldImagePath = path.join(__dirname, "..", user.profileImage)
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath)
-          }
-        }
-
-        user.profileImage = imageUrl
-        saveData(appData)
-
-        // Send response in formidable format
-        res.send({
-          result: "OK",
-          data: {
-            filename: filename,
-            size: imageFile.size,
-            imageUrl: imageUrl,
-          },
-          numberOfImages: 1,
-          message: "upload successful",
-        })
       })
     })
   })
 
-  router.post("/chat-image", (req, res) => {
+  app.post("/api/upload/chat-image", (req, res) => {
     const form = new formidable.IncomingForm()
     form.uploadDir = uploadFolder
     form.keepExtensions = true
@@ -149,7 +155,6 @@ module.exports = (appData, saveData) => {
 
         const imageUrl = `/userimages/${filename}`
 
-        // Send response in formidable format
         res.send({
           result: "OK",
           data: {
@@ -164,8 +169,7 @@ module.exports = (appData, saveData) => {
     })
   })
 
-  // Delete uploaded image
-  router.delete("/image", (req, res) => {
+  app.delete("/api/upload/image", (req, res) => {
     try {
       const { imageUrl } = req.body
       if (!imageUrl) {
@@ -196,6 +200,4 @@ module.exports = (appData, saveData) => {
       })
     }
   })
-
-  return router
 }
