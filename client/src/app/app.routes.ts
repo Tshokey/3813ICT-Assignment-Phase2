@@ -6,6 +6,7 @@ import { Admins } from './components/admins/admins';
 import { Groups } from './components/groups/groups';
 import { Channels } from './components/channels/channels';
 import { authGuard } from './guards/auth-guard';
+import { Video } from './components/video/video';
 
 export const routes: Routes = [
     {
@@ -39,5 +40,10 @@ export const routes: Routes = [
         path: 'admins',
         component: Admins,
         canActivate: [authGuard],
-    }
+    },
+    {
+        path: "video",
+        component: Video,
+        canActivate: [authGuard],
+    },
 ];
