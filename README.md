@@ -199,6 +199,7 @@ export const routes: Routes = [
 -	Client update: 
     - AuthService.setCurrentUser stores user in localStorage.currentUser and signals _user/_loggedIn.
     - Login component navigates to /dashboard. Any components bound to isLoggedIn/currentUser recompute via signals and update their templates.
+
 [2] Users CRUD (Admins component)
 -	Client requests: 
     - GET /api/auth/users → to list users.
@@ -219,6 +220,7 @@ export const routes: Routes = [
     - None; reads Groups collection/file.
 -	Client update: 
     - GroupService.loadGroups sets groups signal. Groups component reads groups() signal; Angular view updates automatically.
+      
 [2] Create Group (Groups component, admin)
 -	Client request: 
     - POST /api/groups with Group
@@ -226,6 +228,7 @@ export const routes: Routes = [
     - Insert Group into Groups collection/file. Initialize: admins, members, channels, interested, bannedUsers.
 -	Client update: 
     - GroupService.createGroup pushes returned group into groups signal, updating the table/cards in Groups UI.
+      
 [3] Join Request (Groups component, user)
 -	Client request: 
     - POST /api/groups/:group/join with { username }
@@ -233,6 +236,7 @@ export const routes: Routes = [
     - Add username to group.interested[] in Groups collection/file. No global vars needed beyond persistent storage.
 -	Client update: 
     - GroupService.loadGroups re-fetches groups; Groups component shows pending requests count/state. If UI separates “My status,” it shows “Requested.”
+      
 [4] Approve/Reject Join (Groups component, admin)
 -	Client request: 
     - POST /api/groups/:group/approve with { username }
@@ -242,6 +246,7 @@ export const routes: Routes = [
     - Reject: remove username from group.interested[].
 -	Client update: 
     - GroupService.loadGroups refreshes; the Groups UI updates members list and removes the username from pending. If the approved user is the current user, their local state (e.g., available channels) becomes visible after next fetch.
+      
 [5] Leave Group (Groups component, member)
 -	Client request: 
     - POST /api/groups/:group/leave with { username }
@@ -249,6 +254,7 @@ export const routes: Routes = [
     - Remove username from group.members[].
 -	Client update: 
     - GroupService.loadGroups refreshes; Groups page removes the group from user’s “My Groups” section.
+      
 [6] Remove Member / Delete Group (Groups component, admin)
 -	Client requests: 
     - DELETE /api/groups/:group/members/:username
@@ -269,6 +275,7 @@ export const routes: Routes = [
     - None; reads Channels collection/file.
 -	Client update: 
     - ChannelService.loadChannels sets channels signal; Channels component updates list.
+      
 [2] Create Channel (Channels component, admin)
 -	Client request: 
     - POST /api/channels with Channel
@@ -276,6 +283,7 @@ export const routes: Routes = [
     - Insert channel into Channels collection/file. Optionally, update the parent Group.channels[] for referential integrity.
 -	Client update: 
     - ChannelService.createChannel pushes into channels signal; UI list updates.
+      
 [3] Join/Leave (Channels + Sockets)
 -	Client REST requests: 
     - POST /api/channels/:ch/join with { groupName, username }
@@ -292,6 +300,7 @@ export const routes: Routes = [
     - Socket events: 
       - user-joined/user-left update presence indicators.
       - new-message updates message stream in real-time.
+        
 [4] Ban/Remove/Report (Channels component, admin/mod)
 -	Client requests: 
     - POST /api/channels/:ch/ban with { groupName, username } → update channel.bannedUsers[]
@@ -302,6 +311,7 @@ export const routes: Routes = [
     - Reports collection/file: append report entry.
 -	Client update: 
     - After success, ChannelService.loadChannels refreshes, updating member lists and moderation UI controls.
+      
 [5] Delete Channel (Channels component, admin)
 -	Client request: 
     - DELETE /api/channels/:ch?groupName=...
@@ -320,7 +330,8 @@ export const routes: Routes = [
 -	Client update: 
     - Server emits new-message to room; Sockets service pushes to messageSubject.
     - Channels component subscribes to getMessages(); it appends to the chat view immediately.
-    - user-joined/user-left events update presence indicators (e.g., online members list).
+    - user-joined/user-left events update presence indicators (e.g., online members list),
+      
 [2] Errors
 -	Client listens to message-error; displays a toast/banner.
 -	Server may send message-error for authorization issues (e.g., banned user, non-member).
@@ -334,6 +345,7 @@ export const routes: Routes = [
     - Writes file to disk or object storage; returns data.imageUrl. Optionally updates Users.profileImage in the Users collection/file.
 -	Client update: 
     - UploadService returns UploadResponse. UI binds to new image URL. If server persists URL on user, a subsequent GET /users reflects it; components show updated avatar.
+
 [2] Chat Image Upload (Channels component)
 -	Client request: 
     - POST /api/upload/chat-image with FormData(image, channelName?, caption?)
@@ -341,6 +353,7 @@ export const routes: Routes = [
     - Writes file; returns imageUrl. Client then emits send-message with messageType = "image" and imageUrl to persist chat message.
 -	Client update: 
     - On new-message event, Channels component displays image message inline.
+
 [3] Delete Image
 -	Client request: 
     - DELETE /api/upload/image with body { imageUrl }
@@ -358,6 +371,7 @@ export const routes: Routes = [
     - Maintains in-memory peer registry map: peerId → username. No persistent storage required; cleared when socket disconnects.
 -	Client update: 
     - Server emits peer-list and new-peer/peer-left to VideoService; Video component subscribes and updates the participants list in real-time.
+
 [2] Media Calls
 -	Client actions: 
     - PeerService.call(peerId, stream) initiates WebRTC call.
@@ -366,6 +380,7 @@ export const routes: Routes = [
     - None on filesystem/DB; signaling is peer-to-peer via PeerJS server (connection IDs). The PeerJS server may track active connections in memory only.
 -	Client update: 
     - Video streams are rendered into the DOM. Toggling mic/cam or screen-share updates local MediaStream and either replaces tracks or re-calls peers; UI reflects state (icons, video tiles).
+
 [3] Teardown
 -	Client actions: 
     - VideoService.unregisterPeer and socket disconnect.
