@@ -193,12 +193,12 @@ export const routes: Routes = [
 #### Authentication and Users
 [1] Login (Login component)
 -	Client request: 
-- •	POST /api/auth/login with { username, password }
+  - POST /api/auth/login with { username, password }
 -	Server changes: 
-•	No file write expected; server verifies credentials against Users store (e.g., DB users collection). No global vars changed except session/JWT issuance.
+  - No file write expected; server verifies credentials against Users store (e.g., DB users collection). No global vars changed except session/JWT issuance.
 -	Client update: 
-•	AuthService.setCurrentUser stores user in localStorage.currentUser and signals _user/_loggedIn.
-•	Login component navigates to /dashboard. Any components bound to isLoggedIn/currentUser recompute via signals and update their templates.
+  - AuthService.setCurrentUser stores user in localStorage.currentUser and signals _user/_loggedIn.
+  - Login component navigates to /dashboard. Any components bound to isLoggedIn/currentUser recompute via signals and update their templates.
 [2] Users CRUD (Admins component)
 -	Client requests: 
 •	GET /api/auth/users → to list users.
