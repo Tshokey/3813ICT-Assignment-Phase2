@@ -1,71 +1,95 @@
-# ChatApp - Phase 1
+# ChatApp - Phase 2
 
 ## 1. Git Repository Organization
 **Repository Structures:**
 
-The project is organized to keep code modular, maintainable, and easy to navigate:
-
-- The **root** directory holds project configurations and documentation.
-- Components folder (`src/app/components/`) - consists of each UI page as a standalone component. This separation allows each page to be developed and tested independently.
-- Models folder (`src/app/models/`) - stores TypeScript classes that define the data entities for User, Group and Channel. Models centralize the data structure definitions for consistent use across the application.
-- Services folder (`src/app/services/`) - contains services for authentication, group, and channel management. These services handle data operations and state management, currently using localStorage.
+•	The project structure has been expanded to support real-time communication, video calling, and comprehensive backend integration
+•	Root Directory: Contains project configurations, documentation, and build files.
+•	Components folder (src/app/components/) - Enhanced with video calling functionality and improved UI components. Each component remains standalone for independent development and testing.
+•	Models folder (src/app/models/) - Expanded to include Message model for chat functionality and UserActivity interface for real-time events.
+•	Services folder (src/app/services/) - Significantly expanded with real-time communication services, video calling, file uploads, and full backend integration replacing localStorage.
+•	Guards folder (src/app/guards/) - Contains route protection logic for authenticated access.
 
 **Version Control**
-- Development is tracked on the `main` branch.
-- Commits are incremental and meaningful, each describing a feature addition or bug fix.
-- Frequent commits ensure clear traceability and make it easier to review and revert changes if needed.
-- This approach ensures smooth collaboration and maintains a clean history of project progress.
-
+Development continues the main branch with incremental, meaningful commits. Each commit represents feature additions, bug fixes, or architectural improvements. Phase 2 commits focus on backend integration, real-time features, and video calling implementation.
 ---
 
 ## 2. Data Structures
 
-All application data persists in the browser's **localStorage** for Phase 1. The key entities are:
+Application data now persists through backend APIs and real-time connections. Key entities have been enhanced:
 
 ### `User` (models/user.ts)
-- Represents an individual user and their roles in the system. 
+- Represents users with enhanced profile and role management capabilities.
 ```
 export class User {
     id: number;
     username: string;
     password: string;
     email: string;
-    roles: Role[];         // 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'
-    groups: string[];      // List of group names the user belongs to
+    roles: Role[];                    // 'USER' | 'GROUP_ADMIN' | 'SUPER_ADMIN'
+    groups: string[];             // List of group names the user belongs to
+    profileImage?: string | null ;   // Profile image path
+    toPromoteGroup?: boolean;         // Promotion flags for admin management
+    toPromoteSuper?: boolean;
 }
+
 ```
 
 ### `Group` (models/groups.ts)
-- Represents a group which can contain channels and users.
+- Enhanced with interest management and channel-specific moderation.
 ```
 export class Group {
   name: string;
-  createdBy: string;        // Username of the creator
-  admins: string[];         // Usernames of group admins
-  members: string[];        // Usernames of group members
-  channels: string[];       // List of channels within the group
-  interested: string[];     // Users interested to join the group
-  bannedUsers: { [channel: string]: string[]}    // Channel specific ban
+  createdBy: string;         // Username of the creator
+  admins: string[];          //Usernames of group admins
+  members: string[];		 // Usernames of group members
+  channels: string[];		 // List of channels within the group
+  interested: string[];  		 // Users interested to join the group
+  bannedUsers: { [channel: string]: string[]}		// Channel specific ban
 }
+
 ```
 ### `Channel` (models/channel.ts)
-- Represents a communication channel within a group.
+- Supports group-based organization and member management.
 ```
 export class Channel {
-    name: string;
-    groupName: string;        // Name of the parent group
-    members: string[];        // Users in the channel
-    bannedUsers: string[];    // Users banned from the channel
+    name: string;		
+    groupName: string;		// Name of the parent group
+    members: string[];		// Users in the channel
+    bannedUsers: string[];	// Users banned from the channel
 }
+
 ```
-Relationships:
-- A user can belong to multiple groups.
-- A group can contain multiple channels.
-- Roles (USER, GROUP_ADMIN, SUPER_ADMIN) determine what actions a user can perform within groups and channels
+### `Message` (models/message.ts)
+- Supports real-time chat with text and image messages.
+```
+export class Message {
+  _id?: string
+  channelName: string
+  groupName: string
+  username: string
+  message: string
+  messageType: "text" | "image"    // Support for different message types
+  imageUrl?: string                // Optional image attachment
+  timestamp: Date
+  createdAt?: Date
+}
+
+```
+### `UserActivity Interface`
+- Tracks user join/leave events in real-time.
+```
+export interface UserActivity {
+  username: string
+  message: string
+  timestamp: Date
+}
+
+```
 ---
 
 ### 3. REST API
-- Phase 1 uses localStorage instead of a backend API. The following is the planned RESTful API structure for Phase 2:
+-	Phase 2 implements a comprehensive RESTful API with real-time communication capabilities:
 
 Method | Route | Parameters | Return Values | Purpose
 ----- | ----- | ----- | ----- | ----- |
