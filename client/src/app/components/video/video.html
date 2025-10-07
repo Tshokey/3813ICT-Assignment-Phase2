@@ -3,11 +3,18 @@
     <h2>Video Chat</h2>
     <div class="peer-info">
       <span class="badge bg-primary">My Peer ID: {{ myPeerId || 'Connecting...' }}</span>
+      <button
+        class="btn btn-sm btn-secondary fullscreen-btn"
+        (click)="toggleFullscreen()"
+        title="Toggle fullscreen"
+      >
+        {{ isFullscreen ? '🗗 Exit Fullscreen' : '🗖 Fullscreen' }}
+      </button>
     </div>
   </div>
 
   <div class="video-section">
-     My Video 
+    My Video 
     <div class="my-video-container">
       <h4>My Video</h4>
       <video
@@ -54,7 +61,7 @@
       </div>
     </div>
 
-     Available Peers 
+    Available Peers 
     <div class="peers-container">
       <h4>Available Peers ({{ availablePeers.length }})</h4>
       <div class="peers-list">
@@ -78,7 +85,7 @@
     </div>
   </div>
 
-   Remote Videos 
+  Remote Videos 
   <div class="remote-videos-section">
     <h4>Connected Peers ({{ videoStreams.length }})</h4>
     <div class="remote-videos-grid">

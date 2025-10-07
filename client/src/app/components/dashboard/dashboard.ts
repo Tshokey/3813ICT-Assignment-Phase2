@@ -1,10 +1,9 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
-import { AuthService } from '../../services/auth-service';
-import { RouterLink, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { User } from '../../models/user';
-import { UploadService } from '../../services/upload-service';
-
+import { Component, ViewChild, ElementRef } from "@angular/core"
+import { AuthService } from "../../services/auth-service"
+import { RouterLink, RouterModule } from "@angular/router"
+import { CommonModule } from "@angular/common"
+import { User } from "../../models/user"
+import { UploadService } from "../../services/upload-service"
 
 @Component({
   selector: "app-dashboard",
@@ -18,11 +17,19 @@ export class Dashboard {
   selectedFile: File | null = null
   uploadMessage = ""
   isUploading = false
+  activeTab: "admins" | "groups" | "channels" = "groups"
+  imageLoadError = false
 
   constructor(
     private auth: AuthService,
     private uploadService: UploadService,
-  ) {}
+  ) {
+    if (this.isSuperAdmin) {
+      this.activeTab = "admins"
+    } else {
+      this.activeTab = "groups"
+    }
+  }
 
   get user(): User | null {
     return this.auth.getCurrentUser()
@@ -42,6 +49,16 @@ export class Dashboard {
 
   get isGroupAdmin() {
     return this.auth.hasRole("GROUP_ADMIN")
+  }
+
+  setActiveTab(tab: "admins" | "groups" | "channels") {
+    this.activeTab = tab
+  }
+
+  getPrimaryRole(): string {
+    if (this.isSuperAdmin) return "SUPER_ADMIN"
+    if (this.isGroupAdmin) return "GROUP_ADMIN"
+    return "USER"
   }
 
   triggerFileInput(): void {
@@ -87,6 +104,7 @@ export class Dashboard {
             this.user.profileImage = response.data.imageUrl
             // Update in localStorage
             localStorage.setItem("currentUser", JSON.stringify(this.user))
+            this.auth.setCurrentUser(this.user)
           }
           this.uploadMessage = "Profile image updated successfully!"
           this.selectedFile = null
@@ -108,14 +126,26 @@ export class Dashboard {
   }
 
   getProfileImageUrl(): string {
-    if (this.user?.profileImage) {
+    if (this.user?.profileImage && !this.imageLoadError) {
       return this.uploadService.getImageUrl(this.user.profileImage)
     }
     return ""
   }
 
   hasProfileImage(): boolean {
-    return !!this.user?.profileImage
+    return !!this.user?.profileImage && !this.imageLoadError
+  }
+
+  onImageError(event: Event): void {
+    console.log("[v0] Profile image failed to load:", event)
+    console.log("[v0] Image URL was:", this.getProfileImageUrl())
+    console.log("[v0] User profile image path:", this.user?.profileImage)
+    this.imageLoadError = true
+  }
+
+  onImageLoad(): void {
+    console.log("[v0] Profile image loaded successfully")
+    console.log("[v0] Image URL:", this.getProfileImageUrl())
+    this.imageLoadError = false
   }
 }
-

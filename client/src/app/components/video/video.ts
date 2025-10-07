@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { PeerService } from "../../services/peer-service"
-import { VideoService, PeerInfo } from "../../services/video-service" 
+import { VideoService, type PeerInfo } from "../../services/video-service"
 import { AuthService } from "../../services/auth-service"
 
 interface VideoStream {
@@ -31,9 +31,12 @@ export class Video implements OnInit, OnDestroy {
   isVideoEnabled = true
   isAudioEnabled = true
   isScreenSharing = false
+  isFullscreen = false
 
   ngOnInit(): void {
     console.log("[v0] Video component initialized")
+
+    document.addEventListener("fullscreenchange", this.onFullscreenChange.bind(this))
 
     // Initialize peer connection
     this.peerService.initPeer().subscribe((peerId) => {
@@ -93,6 +96,8 @@ export class Video implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     console.log("[v0] Video component destroyed")
+
+    document.removeEventListener("fullscreenchange", this.onFullscreenChange.bind(this))
 
     // Stop all streams
     if (this.myStream) {
@@ -256,5 +261,26 @@ export class Video implements OnInit, OnDestroy {
 
   trackByStreamPeerId(index: number, stream: VideoStream): string {
     return stream.peerId
+  }
+
+  toggleFullscreen(): void {
+    const elem = document.documentElement
+
+    if (!this.isFullscreen) {
+      // Enter fullscreen
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen()
+      }
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      }
+    }
+  }
+
+  private onFullscreenChange(): void {
+    this.isFullscreen = !!document.fullscreenElement
+    console.log("[v0] Fullscreen state:", this.isFullscreen)
   }
 }

@@ -1,8 +1,8 @@
-import { Injectable,signal, inject,computed} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { User } from '../models/user';
-import { Router } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Injectable, signal, inject, computed } from "@angular/core"
+import { HttpClient } from "@angular/common/http"
+import { User } from "../models/user"
+import { Router } from "@angular/router"
+import { Observable, firstValueFrom } from "rxjs"
 
 @Injectable({
   providedIn: "root",
@@ -77,12 +77,11 @@ export class AuthService {
     return this.http.post<{ success: boolean; user?: User; message?: string }>(`${this.apiUrl}/users`, user)
   }
 
-  updateUser(id: number, user: Partial<User>): Observable<{ success: boolean; user?: User; message?: string }> {
-    return this.http.put<{ success: boolean; user?: User; message?: string }>(`${this.apiUrl}/users/${id}`, user)
+  updateUser(username: string, user: Partial<User>): Observable<{ success: boolean; user?: User; message?: string }> {
+    return this.http.put<{ success: boolean; user?: User; message?: string }>(`${this.apiUrl}/users/${username}`, user)
   }
 
-  deleteUser(id: number): Observable<{ success: boolean; message?: string }> {
-    return this.http.delete<{ success: boolean; message?: string }>(`${this.apiUrl}/users/${id}`)
+  deleteUser(username: string): Observable<{ success: boolean; message?: string }> {
+    return this.http.delete<{ success: boolean; message?: string }>(`${this.apiUrl}/users/${username}`)
   }
 }
-

@@ -20,6 +20,9 @@
 
 .peer-info {
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .video-section {
@@ -61,6 +64,10 @@
 .video-controls .btn {
   flex: 1;
   min-width: 120px;
+}
+
+.fullscreen-btn {
+  white-space: nowrap;
 }
 
 .peers-container {

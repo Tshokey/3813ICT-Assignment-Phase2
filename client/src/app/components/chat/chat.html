@@ -142,7 +142,8 @@
             </div>
             
             <div *ngIf="message.messageType === 'image'" class="image-message">
-              <img [src]="'http://localhost:3000' + message.imageUrl" [alt]="message.message" class="message-image">
+              <!-- Changed http:// to https:// to match server protocol -->
+              <img [src]="'https://localhost:3000' + message.imageUrl" [alt]="message.message" class="message-image">
               <div *ngIf="message.message" class="image-caption">{{ message.message }}</div>
             </div>
           </div>

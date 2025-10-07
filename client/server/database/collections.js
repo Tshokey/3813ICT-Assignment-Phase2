@@ -1,38 +1,27 @@
-const { getDb } = require("./db")
-
-/**
- * Get users collection
- */
+const { getDb } = require("./db");
+//Get users collection
 function getUsersCollection() {
-  return getDb().collection("users")
+  return getDb().collection("users");
 }
 
-/**
- * Get groups collection
- */
+//Get groups collection
 function getGroupsCollection() {
-  return getDb().collection("groups")
+  return getDb().collection("groups");
 }
 
-/**
- * Get channels collection
- */
+//Get channels collection
 function getChannelsCollection() {
-  return getDb().collection("channels")
+  return getDb().collection("channels");
 }
 
-/**
- * Get messages collection
- */
+//Get messages collection
 function getMessagesCollection() {
-  return getDb().collection("messages")
+  return getDb().collection("messages");
 }
 
-/**
- * Get user reports collection
- */
+//Get user reports collection
 function getUserReportsCollection() {
-  return getDb().collection("userReports")
+  return getDb().collection("userReports");
 }
 
 module.exports = {

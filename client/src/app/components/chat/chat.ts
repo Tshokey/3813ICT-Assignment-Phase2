@@ -420,20 +420,14 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       return
     }
 
-    this.isVideoCallActive = !this.isVideoCallActive
+    const width = 1200
+    const height = 800
+    const left = (screen.width - width) / 2
+    const top = (screen.height - height) / 2
 
-    if (this.isVideoCallActive) {
-      // Connect video socket and register peer
-      this.videoSocketService.connect()
-      if (this.myPeerId && this.currentUser) {
-        this.videoSocketService.registerPeer(this.myPeerId, this.currentUser.username)
-      }
-      // Start camera
-      this.startCamera()
-    } else {
-      // Stop video and disconnect
-      this.stopVideoCall()
-    }
+    const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+
+    window.open("/video", "VideoChat", features)
   }
 
   async startCamera(): Promise<void> {

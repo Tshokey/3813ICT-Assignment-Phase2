@@ -1,24 +1,24 @@
-const express = require("express")
-const formidable = require("formidable")
-const path = require("path")
-const fs = require("fs")
+const express = require("express");
+const formidable = require("formidable");
+const path = require("path");
+const fs = require("fs");
 
 module.exports = (db, app) => {
-  const usersCollection = db.collection("users")
-  const uploadFolder = path.join(__dirname, "..", "userimages")
+  const usersCollection = db.collection("users");
+  const uploadFolder = path.join(__dirname, "..", "userimages");
 
   if (!fs.existsSync(uploadFolder)) {
-    fs.mkdirSync(uploadFolder, { recursive: true })
+    fs.mkdirSync(uploadFolder, { recursive: true });
   }
 
   app.post("/api/upload/profile-image", (req, res) => {
-    const form = new formidable.IncomingForm()
-    form.uploadDir = uploadFolder
-    form.keepExtensions = true
+    const form = new formidable.IncomingForm();
+    form.uploadDir = uploadFolder;
+    form.keepExtensions = true;
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
-        console.log("Error parsing the files")
+        console.log("Error parsing the files");
         return res.status(400).json({
           status: "Fail",
           message: "There was an error parsing the files",
@@ -26,9 +26,9 @@ module.exports = (db, app) => {
         })
       }
 
-      let imageFile = files.image
+      let imageFile = files.image;
       if (Array.isArray(imageFile)) {
-        imageFile = imageFile[0]
+        imageFile = imageFile[0];
       }
 
       if (!imageFile) {
@@ -38,9 +38,9 @@ module.exports = (db, app) => {
         })
       }
 
-      let username = fields.username
+      let username = fields.username;
       if (Array.isArray(username)) {
-        username = username[0]
+        username = username[0];
       }
 
       if (!username) {
@@ -50,15 +50,15 @@ module.exports = (db, app) => {
         })
       }
 
-      const originalName = imageFile.originalFilename || imageFile.name || "image.jpg"
-      const fileExt = path.extname(originalName) || ".jpg"
-      const oldpath = imageFile.filepath || imageFile.path
-      const filename = `profile-${username}-${Date.now()}${fileExt}`
-      const newpath = path.join(uploadFolder, filename)
+      const originalName = imageFile.originalFilename || imageFile.name || "image.jpg";
+      const fileExt = path.extname(originalName) || ".jpg";
+      const oldpath = imageFile.filepath || imageFile.path;
+      const filename = `profile-${username}-${Date.now()}${fileExt}`;
+      const newpath = path.join(uploadFolder, filename);
 
       fs.rename(oldpath, newpath, async (err) => {
         if (err) {
-          console.log("Error renaming file")
+          console.log("Error renaming file");
           return res.status(400).json({
             status: "Fail",
             message: "There was an error saving the file",
@@ -66,10 +66,10 @@ module.exports = (db, app) => {
           })
         }
 
-        const imageUrl = `/userimages/${filename}`
+        const imageUrl = `/userimages/${filename}`;
 
         try {
-          const user = await usersCollection.findOne({ username })
+          const user = await usersCollection.findOne({ username });
 
           if (!user) {
             return res.status(404).json({
@@ -80,13 +80,13 @@ module.exports = (db, app) => {
 
           // Delete old profile image if it exists
           if (user.profileImage) {
-            const oldImagePath = path.join(__dirname, "..", user.profileImage)
+            const oldImagePath = path.join(__dirname, "..", user.profileImage);
             if (fs.existsSync(oldImagePath)) {
-              fs.unlinkSync(oldImagePath)
+              fs.unlinkSync(oldImagePath);
             }
           }
 
-          await usersCollection.updateOne({ username }, { $set: { profileImage: imageUrl, updatedAt: new Date() } })
+          await usersCollection.updateOne({ username }, { $set: { profileImage: imageUrl, updatedAt: new Date() } });
 
           res.send({
             result: "OK",
@@ -99,7 +99,7 @@ module.exports = (db, app) => {
             message: "upload successful",
           })
         } catch (dbError) {
-          console.error("Database error:", dbError)
+          console.error("Database error:", dbError);
           return res.status(500).json({
             status: "Fail",
             message: "Database error",
@@ -111,13 +111,13 @@ module.exports = (db, app) => {
   })
 
   app.post("/api/upload/chat-image", (req, res) => {
-    const form = new formidable.IncomingForm()
-    form.uploadDir = uploadFolder
-    form.keepExtensions = true
+    const form = new formidable.IncomingForm();
+    form.uploadDir = uploadFolder;
+    form.keepExtensions = true;
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
-        console.log("Error parsing the files")
+        console.log("Error parsing the files");
         return res.status(400).json({
           status: "Fail",
           message: "There was an error parsing the files",
@@ -137,15 +137,15 @@ module.exports = (db, app) => {
         })
       }
 
-      const originalName = imageFile.originalFilename || imageFile.name || "image.jpg"
-      const fileExt = path.extname(originalName) || ".jpg"
-      const oldpath = imageFile.filepath || imageFile.path
-      const filename = `chat-${Date.now()}${fileExt}`
-      const newpath = path.join(uploadFolder, filename)
+      const originalName = imageFile.originalFilename || imageFile.name || "image.jpg";
+      const fileExt = path.extname(originalName) || ".jpg";
+      const oldpath = imageFile.filepath || imageFile.path;
+      const filename = `chat-${Date.now()}${fileExt}`;
+      const newpath = path.join(uploadFolder, filename);
 
       fs.rename(oldpath, newpath, (err) => {
         if (err) {
-          console.log("Error renaming file")
+          console.log("Error renaming file");
           return res.status(400).json({
             status: "Fail",
             message: "There was an error saving the file",
@@ -153,7 +153,7 @@ module.exports = (db, app) => {
           })
         }
 
-        const imageUrl = `/userimages/${filename}`
+        const imageUrl = `/userimages/${filename}`;
 
         res.send({
           result: "OK",
@@ -171,7 +171,7 @@ module.exports = (db, app) => {
 
   app.delete("/api/upload/image", (req, res) => {
     try {
-      const { imageUrl } = req.body
+      const { imageUrl } = req.body;
       if (!imageUrl) {
         return res.status(400).json({
           status: "Fail",
@@ -179,9 +179,9 @@ module.exports = (db, app) => {
         })
       }
 
-      const imagePath = path.join(__dirname, "..", imageUrl)
+      const imagePath = path.join(__dirname, "..", imageUrl);
       if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath)
+        fs.unlinkSync(imagePath);
         res.json({
           result: "OK",
           message: "Image deleted successfully",
@@ -193,7 +193,7 @@ module.exports = (db, app) => {
         })
       }
     } catch (error) {
-      console.error("Error deleting image:", error)
+      console.error("Error deleting image:", error);
       res.status(500).json({
         status: "Fail",
         message: "Failed to delete image",

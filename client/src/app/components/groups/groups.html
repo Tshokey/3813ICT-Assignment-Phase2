@@ -1,92 +1,98 @@
 <div class="container">
-  <h1>Groups</h1>
-  <div *ngIf="user">
-    <p>Logged in as: {{user.username}} </p>
-    <p>(Roles: {{user.roles.join(', ')}})</p>
-  </div>
+  <header class="groups-header">
+    <h1 class="groups-title">Groups</h1>
+  </header>
 
-  <div *ngIf="errormsg" class="alert alert-danger">{{errormsg}}</div>
+  <div class="groups-content">
+    <div *ngIf="user" class="user-info-section">
+      <p><strong>Logged in as:</strong> {{user.username}}</p>
+      <p><strong>Roles:</strong> {{user.roles.join(', ')}}</p>
+    </div>
 
-  <div *ngIf="auth.hasRole('GROUP_ADMIN') || auth.hasRole('SUPER_ADMIN')">
-    <input [(ngModel)]="newGroupName" class="form-control" placeholder="Enter group name" />
-    <button class="btn btn-primary mt-2" (click)="createGroup()">Create Group</button>
-  </div>
-  <hr/>
+    <div *ngIf="errormsg" class="alert alert-danger">{{errormsg}}</div>
 
-  <h3>All Groups</h3>
-  <ul class="list-group">
-    <li *ngFor="let group of groups" class="list-group-item">
-      <div class="d-flex justify-content-between align-items-start">
-        <div class="flex-grow-1">
-          <h6><strong>{{group.name}}</strong></h6>
-          <small> (Group Admins: {{group.admins.join(', ')}})</small>
+    <div *ngIf="auth.hasRole('GROUP_ADMIN') || auth.hasRole('SUPER_ADMIN')" class="create-group-section">
+      <input [(ngModel)]="newGroupName" class="form-control" placeholder="Enter group name" />
+      <button class="btn btn-primary mt-2" (click)="createGroup()">Create Group</button>
+    </div>
 
-           Made members collapsible with dropdown 
-          <div class="mt-2">
-            <button 
-              class="btn btn-sm btn-outline-secondary" 
-              (click)="toggleMembers(group.name)"
-              *ngIf="group.members.length > 0">
-              <span *ngIf="!isMembersExpanded(group.name)">▶ Show Members ({{group.members.length}})</span>
-              <span *ngIf="isMembersExpanded(group.name)">▼ Hide Members ({{group.members.length}})</span>
-            </button>
-            <span *ngIf="group.members.length === 0"><em>No members yet</em></span>
-          </div>
+    <div class="groups-list-section">
+      <h3>All Groups</h3>
+      <ul class="list-group">
+        <li *ngFor="let group of groups" class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <h6><strong>{{group.name}}</strong></h6>
+              <small> (Group Admins: {{group.admins.join(', ')}})</small>
 
-           Collapsible members list with multi-select 
-          <div *ngIf="isMembersExpanded(group.name)" class="mt-2 members-section">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <strong>Members:</strong>
+              <!-- Made members collapsible with dropdown -->
+              <div class="mt-2">
+                <button 
+                  class="btn btn-sm btn-outline-secondary" 
+                  (click)="toggleMembers(group.name)"
+                  *ngIf="group.members.length > 0">
+                  <span *ngIf="!isMembersExpanded(group.name)">▶ Show Members ({{group.members.length}})</span>
+                  <span *ngIf="isMembersExpanded(group.name)">▼ Hide Members ({{group.members.length}})</span>
+                </button>
+                <span *ngIf="group.members.length === 0"><em>No members yet</em></span>
+              </div>
+
+              <!-- Collapsible members list with multi-select -->
+              <div *ngIf="isMembersExpanded(group.name)" class="mt-2 members-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>Members:</strong>
+                  <button 
+                    *ngIf="(auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')) && getSelectedMembers(group.name).length > 0"
+                    class="btn btn-sm btn-danger"
+                    (click)="removeSelectedMembers(group)">
+                    Remove Selected ({{getSelectedMembers(group.name).length}})
+                  </button>
+                </div>
+                <ul class="list-unstyled">
+                  <li *ngFor="let m of group.members" class="member-item">
+                    <label class="d-flex align-items-center">
+                      <input 
+                        *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')"
+                        type="checkbox"
+                        [checked]="isMemberSelected(group.name, m)"
+                        (change)="toggleMemberSelection(group.name, m)"
+                        class="me-2">
+                      <span>{{m}}</span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Moved delete button to top right -->
+            <div class="group-actions">
               <button 
-                *ngIf="(auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')) && getSelectedMembers(group.name).length > 0"
-                class="btn btn-sm btn-danger"
-                (click)="removeSelectedMembers(group)">
-                Remove Selected ({{getSelectedMembers(group.name).length}})
+                *ngIf="user && (auth.hasRole('SUPER_ADMIN') || (auth.hasRole('GROUP_ADMIN') && group.createdBy === user.username))" 
+                class="btn btn-sm btn-danger" 
+                (click)="deleteGroup(group)">
+                Delete Group
               </button>
             </div>
-            <ul class="list-unstyled">
-              <li *ngFor="let m of group.members" class="member-item">
-                <label class="d-flex align-items-center">
-                  <input 
-                    *ngIf="auth.hasRole('SUPER_ADMIN') || auth.hasRole('GROUP_ADMIN')"
-                    type="checkbox"
-                    [checked]="isMemberSelected(group.name, m)"
-                    (change)="toggleMemberSelection(group.name, m)"
-                    class="me-2">
-                  <span>{{m}}</span>
-                </label>
+          </div>
+
+          <div class="mt-2">
+            <button *ngIf="user && !group.members.includes(user.username) && !group.interested.includes(user.username)" class="btn btn-sm btn-success ms-2" (click)="registerInterest(group)">Join</button>
+            <button *ngIf="user && group.interested.includes(user.username)" class="btn btn-sm btn-secondary me-2" disabled>Request Send</button>
+            <button *ngIf="user && group.members.includes(user.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveGroup(group)">Leave</button>
+          </div>
+
+          <div *ngIf="auth.hasRole('SUPER_ADMIN') || (user && group.admins.includes(user.username))" class="mt-2">
+            <h5><strong>Pending Requests</strong></h5> 
+            <ul>
+              <li *ngFor="let u of group.interested">
+                {{ u }}
+                <button class="btn btn-sm btn-success ms-2" (click)="approveUser(group, u)">Accept</button>
+                <button class="btn btn-sm btn-danger ms-2" (click)="rejectUser(group, u)">Reject</button>
               </li>
             </ul>
           </div>
-        </div>
-
-         Moved delete button to top right 
-        <div class="group-actions">
-          <button 
-            *ngIf="user && (auth.hasRole('SUPER_ADMIN') || (auth.hasRole('GROUP_ADMIN') && group.createdBy === user.username))" 
-            class="btn btn-sm btn-danger" 
-            (click)="deleteGroup(group)">
-            Delete Group
-          </button>
-        </div>
-      </div>
-
-      <div class="mt-2">
-        <button *ngIf="user && !group.members.includes(user.username) && !group.interested.includes(user.username)" class="btn btn-sm btn-success ms-2" (click)="registerInterest(group)">Join</button>
-        <button *ngIf="user && group.interested.includes(user.username)" class="btn btn-sm btn-secondary me-2" disabled>Request Send</button>
-        <button *ngIf="user && group.members.includes(user.username)" class="btn btn-sm btn-warning ms-2" (click)="leaveGroup(group)">Leave</button>
-      </div>
-
-      <div *ngIf="auth.hasRole('SUPER_ADMIN') || (user && group.admins.includes(user.username))" class="mt-2">
-        <h5><strong>Pending Requests</strong></h5> 
-        <ul>
-          <li *ngFor="let u of group.interested">
-            {{ u }}
-            <button class="btn btn-sm btn-success ms-2" (click)="approveUser(group, u)">Accept</button>
-            <button class="btn btn-sm btn-danger ms-2" (click)="rejectUser(group, u)">Reject</button>
-          </li>
-        </ul>
-      </div>
-    </li>
-  </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>
