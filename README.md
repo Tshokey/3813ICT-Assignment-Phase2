@@ -194,7 +194,7 @@ export const routes: Routes = [
 [1] Login (Login component)
 -	Client request:
   
--- POST /api/auth/login with { username, password }
+- POST /api/auth/login with { username, password }
 -	Server changes: 
   - No file write expected; server verifies credentials against Users store (e.g., DB users collection). No global vars changed except session/JWT issuance.
 -	Client update: 
