@@ -195,16 +195,16 @@ export const routes: Routes = [
 -	Client request:
     - POST /api/auth/login with { username, password }
 -	Server changes: 
-  - No file write expected; server verifies credentials against Users store (e.g., DB users collection). No global vars changed except session/JWT issuance.
+    - No file write expected; server verifies credentials against Users store (e.g., DB users collection). No global vars changed except session/JWT issuance.
 -	Client update: 
-  - AuthService.setCurrentUser stores user in localStorage.currentUser and signals _user/_loggedIn.
-  - Login component navigates to /dashboard. Any components bound to isLoggedIn/currentUser recompute via signals and update their templates.
+    - AuthService.setCurrentUser stores user in localStorage.currentUser and signals _user/_loggedIn.
+    - Login component navigates to /dashboard. Any components bound to isLoggedIn/currentUser recompute via signals and update their templates.
 [2] Users CRUD (Admins component)
 -	Client requests: 
-•	GET /api/auth/users → to list users.
-•	POST /api/auth/users with Partial<User> → create.
-•	PUT /api/auth/users/:username with Partial<User> → update.
-•	DELETE /api/auth/users/:username → delete.
+    •	GET /api/auth/users → to list users.
+    •	POST /api/auth/users with Partial<User> → create.
+    •	PUT /api/auth/users/:username with Partial<User> → update.
+    •	DELETE /api/auth/users/:username → delete.
 -	Server changes: 
 •	Users collection updated accordingly: insert/update/remove document (or rows). If using filesystem JSON, write updated JSON file; if DB, persist to table/collection.
 -	Client update: 
