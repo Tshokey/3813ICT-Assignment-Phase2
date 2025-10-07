@@ -50,6 +50,6 @@ export class UploadService {
 
   getImageUrl(relativePath: string): string {
     if (!relativePath) return ""
-    return `http://localhost:3000${relativePath}`
+    return `https://localhost:3000${relativePath}`
   }
 }

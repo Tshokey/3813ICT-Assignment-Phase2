@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { PeerService } from "../../services/peer-service"
-import { VideoService, type PeerInfo } from "../../services/video-service"
+import { VideoService, PeerInfo } from "../../services/video-service"
 import { AuthService } from "../../services/auth-service"
 
 interface VideoStream {

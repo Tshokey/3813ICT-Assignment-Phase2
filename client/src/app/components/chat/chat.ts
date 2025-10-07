@@ -9,7 +9,7 @@ import { UploadService } from "../../services/upload-service"
 import { Router } from "@angular/router"
 import { PeerService } from "../../services/peer-service"
 import { VideoService, PeerInfo } from "../../services/video-service"
-import type { MediaConnection } from "peerjs"
+import { MediaConnection } from "peerjs"
 
 interface VideoStream {
   peerId: string
