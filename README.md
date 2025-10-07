@@ -206,121 +206,121 @@ export const routes: Routes = [
     •	PUT /api/auth/users/:username with Partial<User> → update.
     •	DELETE /api/auth/users/:username → delete.
 -	Server changes: 
-•	Users collection updated accordingly: insert/update/remove document (or rows). If using filesystem JSON, write updated JSON file; if DB, persist to table/collection.
+    •	Users collection updated accordingly: insert/update/remove document (or rows). If using filesystem JSON, write updated JSON file; if DB, persist to table/collection.
 -	Client update: 
-•	Admins component calls AuthService methods; responses drive UI tables. On success, component refreshes the list via GET or updates in-memory array to reflect changes.
+    •	Admins component calls AuthService methods; responses drive UI tables. On success, component refreshes the list via GET or updates in-memory array to reflect changes.
 
 --
 #### Groups
 [1] List Groups (Groups component)
 -	Client request: 
-•	GET /api/groups
+    •	GET /api/groups
 -	Server changes: 
-•	None; reads Groups collection/file.
+    •	None; reads Groups collection/file.
 -	Client update: 
-•	GroupService.loadGroups sets groups signal. Groups component reads groups() signal; Angular view updates automatically.
+    •	GroupService.loadGroups sets groups signal. Groups component reads groups() signal; Angular view updates automatically.
 [2] Create Group (Groups component, admin)
 -	Client request: 
-•	POST /api/groups with Group
+    •	POST /api/groups with Group
 -	Server changes: 
-•	Insert Group into Groups collection/file. Initialize: admins, members, channels, interested, bannedUsers.
+    •	Insert Group into Groups collection/file. Initialize: admins, members, channels, interested, bannedUsers.
 -	Client update: 
-•	GroupService.createGroup pushes returned group into groups signal, updating the table/cards in Groups UI.
+    •	GroupService.createGroup pushes returned group into groups signal, updating the table/cards in Groups UI.
 [3] Join Request (Groups component, user)
 -	Client request: 
-•	POST /api/groups/:group/join with { username }
+    •	POST /api/groups/:group/join with { username }
 -	Server changes: 
-•	Add username to group.interested[] in Groups collection/file. No global vars needed beyond persistent storage.
+    •	Add username to group.interested[] in Groups collection/file. No global vars needed beyond persistent storage.
 -	Client update: 
-•	GroupService.loadGroups re-fetches groups; Groups component shows pending requests count/state. If UI separates “My status,” it shows “Requested.”
+    •	GroupService.loadGroups re-fetches groups; Groups component shows pending requests count/state. If UI separates “My status,” it shows “Requested.”
 [4] Approve/Reject Join (Groups component, admin)
 -	Client request: 
-•	POST /api/groups/:group/approve with { username }
-•	POST /api/groups/:group/reject with { username }
+    •	POST /api/groups/:group/approve with { username }
+    •	POST /api/groups/:group/reject with { username }
 -	Server changes: 
-•	Approve: move username from group.interested[] → group.members[] in storage.
-•	Reject: remove username from group.interested[].
+    •	Approve: move username from group.interested[] → group.members[] in storage.
+    •	Reject: remove username from group.interested[].
 -	Client update: 
-•	GroupService.loadGroups refreshes; the Groups UI updates members list and removes the username from pending. If the approved user is the current user, their local state (e.g., available channels) becomes visible after next fetch.
+    •	GroupService.loadGroups refreshes; the Groups UI updates members list and removes the username from pending. If the approved user is the current user, their local state (e.g., available channels) becomes visible after next fetch.
 [5] Leave Group (Groups component, member)
 -	Client request: 
-•	POST /api/groups/:group/leave with { username }
+    •	POST /api/groups/:group/leave with { username }
 -	Server changes: 
-•	Remove username from group.members[].
+    •	Remove username from group.members[].
 -	Client update: 
-•	GroupService.loadGroups refreshes; Groups page removes the group from user’s “My Groups” section.
+    •	GroupService.loadGroups refreshes; Groups page removes the group from user’s “My Groups” section.
 [6] Remove Member / Delete Group (Groups component, admin)
 -	Client requests: 
-•	DELETE /api/groups/:group/members/:username
-•	DELETE /api/groups/:group
+    •	DELETE /api/groups/:group/members/:username
+    •	DELETE /api/groups/:group
 -	Server changes: 
-•	Remove member from group.members[] OR remove group document entirely.
-•	If filesystem JSON, write updated file; if DB, delete document. Optionally cascade delete child channels if enforced server-side.
+    •	Remove member from group.members[] OR remove group document entirely.
+    •	If filesystem JSON, write updated file; if DB, delete document. Optionally cascade delete child channels if enforced server-side.
 -	Client update: 
-•	For remove member: loadGroups refreshes; UI updates memberships table.
-•	For delete group: GroupService filters out group from groups; UI list updates immediately.
+    •	For remove member: loadGroups refreshes; UI updates memberships table.
+    •	For delete group: GroupService filters out group from groups; UI list updates immediately.
 
 --
 #### Channels
 [1] List Channels (Channels component)
 -	Client request: 
-•	GET /api/channels or GET /api/channels/group/:group
+    •	GET /api/channels or GET /api/channels/group/:group
 -	Server changes: 
-•	None; reads Channels collection/file.
+    •	None; reads Channels collection/file.
 -	Client update: 
-•	ChannelService.loadChannels sets channels signal; Channels component updates list.
+    •	ChannelService.loadChannels sets channels signal; Channels component updates list.
 [2] Create Channel (Channels component, admin)
 -	Client request: 
-•	POST /api/channels with Channel
+    •	POST /api/channels with Channel
 -	Server changes: 
-•	Insert channel into Channels collection/file. Optionally, update the parent Group.channels[] for referential integrity.
+    •	Insert channel into Channels collection/file. Optionally, update the parent Group.channels[] for referential integrity.
 -	Client update: 
-•	ChannelService.createChannel pushes into channels signal; UI list updates.
+    •	ChannelService.createChannel pushes into channels signal; UI list updates.
 [3] Join/Leave (Channels + Sockets)
 -	Client REST requests: 
-•	POST /api/channels/:ch/join with { groupName, username }
-•	POST /api/channels/:ch/leave with { groupName, username }
+    •	POST /api/channels/:ch/join with { groupName, username }
+    •	POST /api/channels/:ch/leave with { groupName, username }
 -	Server changes: 
-•	Update channel.members[] accordingly. Optionally sync to group-level membership constraints.
+    •	Update channel.members[] accordingly. Optionally sync to group-level membership constraints.
 -	Client Socket actions: 
-•	Sockets.joinChannel emits join-channel with { channelName, groupName, username }.
-•	Sockets.leaveChannel emits leave-channel.
+    •	Sockets.joinChannel emits join-channel with { channelName, groupName, username }.
+    •	Sockets.leaveChannel emits leave-channel.
 -	Server Socket changes: 
-•	Server’s socket room membership updates (no file). Optionally update an in-memory presence map keyed by channelName and socketId/username.
+    •	Server’s socket room membership updates (no file). Optionally update an in-memory presence map keyed by channelName and socketId/username.
 -	Client UI updates: 
-•	On REST success: ChannelService.loadChannels refreshes; Channels UI shows membership state.
-•	Socket events: 
-	user-joined/user-left update presence indicators.
-	new-message updates message stream in real-time.
+    •	On REST success: ChannelService.loadChannels refreshes; Channels UI shows membership state.
+    •	Socket events: 
+      - user-joined/user-left update presence indicators.
+      - new-message updates message stream in real-time.
 [4] Ban/Remove/Report (Channels component, admin/mod)
 -	Client requests: 
-•	POST /api/channels/:ch/ban with { groupName, username } → update channel.bannedUsers[]
-•	DELETE /api/channels/:ch/members/:username?groupName=... → remove from members[]
-•	POST /api/channels/:ch/report with { groupName, username, reason, reportedBy } → insert report record
+    •	POST /api/channels/:ch/ban with { groupName, username } → update channel.bannedUsers[]
+    •	DELETE /api/channels/:ch/members/:username?groupName=... → remove from members[]
+    •	POST /api/channels/:ch/report with { groupName, username, reason, reportedBy } → insert report record
 -	Server changes: 
-•	Channels collection: modify bannedUsers/members as appropriate.
-•	Reports collection/file: append report entry.
+    •	Channels collection: modify bannedUsers/members as appropriate.
+    •	Reports collection/file: append report entry.
 -	Client update: 
-•	After success, ChannelService.loadChannels refreshes, updating member lists and moderation UI controls.
+    •	After success, ChannelService.loadChannels refreshes, updating member lists and moderation UI controls.
 [5] Delete Channel (Channels component, admin)
 -	Client request: 
-•	DELETE /api/channels/:ch?groupName=...
+    •	DELETE /api/channels/:ch?groupName=...
 -	Server changes: 
-•	Remove channel document/row; optionally update Group.channels[].
+    •	Remove channel document/row; optionally update Group.channels[].
 -	Client update: 
-•	ChannelService removes from local channels signal; Channels list updates immediately.
+    •	ChannelService removes from local channels signal; Channels list updates immediately.
 
 --
 #### Chat Messages and Presence (Sockets)
 [1] Send Message (Channels component + Sockets)
 -	Client action: 
-•	Sockets.sendMessage emits send-message with { channelName, groupName, username, message, messageType, imageUrl? }.
+    •	Sockets.sendMessage emits send-message with { channelName, groupName, username, message, messageType, imageUrl? }.
 -	Server changes: 
-•	Persist message to Messages collection/file (append new record with timestamp). No global var required except an optional in-memory message cache.
+    •	Persist message to Messages collection/file (append new record with timestamp). No global var required except an optional in-memory message cache.
 -	Client update: 
-•	Server emits new-message to room; Sockets service pushes to messageSubject.
-•	Channels component subscribes to getMessages(); it appends to the chat view immediately.
-•	user-joined/user-left events update presence indicators (e.g., online members list).
+    •	Server emits new-message to room; Sockets service pushes to messageSubject.
+    •	Channels component subscribes to getMessages(); it appends to the chat view immediately.
+    •	user-joined/user-left events update presence indicators (e.g., online members list).
 [2] Errors
 -	Client listens to message-error; displays a toast/banner.
 -	Server may send message-error for authorization issues (e.g., banned user, non-member).
@@ -329,69 +329,69 @@ export const routes: Routes = [
 #### Uploads (Profile and Chat Images)
 [1] Profile Image Upload (Profile area in Dashboard/Admins)
 -	Client request: 
-•	POST /api/upload/profile-image with FormData(image, username)
+    •	POST /api/upload/profile-image with FormData(image, username)
 -	Server changes: 
-•	Writes file to disk or object storage; returns data.imageUrl. Optionally updates Users.profileImage in the Users collection/file.
+    •	Writes file to disk or object storage; returns data.imageUrl. Optionally updates Users.profileImage in the Users collection/file.
 -	Client update: 
-•	UploadService returns UploadResponse. UI binds to new image URL. If server persists URL on user, a subsequent GET /users reflects it; components show updated avatar.
+    •	UploadService returns UploadResponse. UI binds to new image URL. If server persists URL on user, a subsequent GET /users reflects it; components show updated avatar.
 [2] Chat Image Upload (Channels component)
 -	Client request: 
-•	POST /api/upload/chat-image with FormData(image, channelName?, caption?)
+    •	POST /api/upload/chat-image with FormData(image, channelName?, caption?)
 -	Server changes: 
-•	Writes file; returns imageUrl. Client then emits send-message with messageType = "image" and imageUrl to persist chat message.
+    •	Writes file; returns imageUrl. Client then emits send-message with messageType = "image" and imageUrl to persist chat message.
 -	Client update: 
-•	On new-message event, Channels component displays image message inline.
+    •	On new-message event, Channels component displays image message inline.
 [3] Delete Image
 -	Client request: 
-•	DELETE /api/upload/image with body { imageUrl }
+    •	DELETE /api/upload/image with body { imageUrl }
 -	Server changes: 
-•	Removes file from storage; if referenced in a record (e.g., user profile), server should also clear or update that field.
+    •	Removes file from storage; if referenced in a record (e.g., user profile), server should also clear or update that field.
 -	Client update: 
-•	Components relying on that image re-fetch user/channel state or update local state to remove/replace the image.
+    •	Components relying on that image re-fetch user/channel state or update local state to remove/replace the image.
 
 --
 #### Video Calls (Video component, PeerJS + Socket.IO presence)
 [1] Peer Registration and Presence
 -	Client actions: 
-•	PeerService.initPeer creates a PeerJS peer with id; VideoService.registerPeer emits register-peer with { peerId, username }.
+    •	PeerService.initPeer creates a PeerJS peer with id; VideoService.registerPeer emits register-peer with { peerId, username }.
 -	Server changes: 
-•	Maintains in-memory peer registry map: peerId → username. No persistent storage required; cleared when socket disconnects.
+    •	Maintains in-memory peer registry map: peerId → username. No persistent storage required; cleared when socket disconnects.
 -	Client update: 
-•	Server emits peer-list and new-peer/peer-left to VideoService; Video component subscribes and updates the participants list in real-time.
+    •	Server emits peer-list and new-peer/peer-left to VideoService; Video component subscribes and updates the participants list in real-time.
 [2] Media Calls
 -	Client actions: 
-•	PeerService.call(peerId, stream) initiates WebRTC call.
-•	Incoming calls answered with call.answer(myStream).
+    •	PeerService.call(peerId, stream) initiates WebRTC call.
+    •	Incoming calls answered with call.answer(myStream).
 -	Server changes: 
-•	None on filesystem/DB; signaling is peer-to-peer via PeerJS server (connection IDs). The PeerJS server may track active connections in memory only.
+    •	None on filesystem/DB; signaling is peer-to-peer via PeerJS server (connection IDs). The PeerJS server may track active connections in memory only.
 -	Client update: 
-•	Video streams are rendered into the DOM. Toggling mic/cam or screen-share updates local MediaStream and either replaces tracks or re-calls peers; UI reflects state (icons, video tiles).
+    •	Video streams are rendered into the DOM. Toggling mic/cam or screen-share updates local MediaStream and either replaces tracks or re-calls peers; UI reflects state (icons, video tiles).
 [3] Teardown
 -	Client actions: 
-•	VideoService.unregisterPeer and socket disconnect.
-•	PeerService.destroy to tear down PeerJS.
+    •	VideoService.unregisterPeer and socket disconnect.
+    •	PeerService.destroy to tear down PeerJS.
 -	Server changes: 
-•	Removes peer from in-memory registry on unregister or disconnect.
+    •	Removes peer from in-memory registry on unregister or disconnect.
 -	Client update: 
-•	Video component removes video tiles and updates presence list.
+    •	Video component removes video tiles and updates presence list.
 ---
 
 ### 6. Global Variables and Server Files Overview
 -	Users collection/file: 
-•	Updated by Auth/users CRUD, profile image updates.
+    •	Updated by Auth/users CRUD, profile image updates.
 -	Groups collection/file: 
-•	Updated by create/join/approve/reject/leave/remove/delete flows.
+    •	Updated by create/join/approve/reject/leave/remove/delete flows.
 -	Channels collection/file: 
-•	Updated by create/join/leave/ban/remove/delete flows.
+    •	Updated by create/join/leave/ban/remove/delete flows.
 -	Messages collection/file: 
-•	Appended for each send-message event.
+    •	Appended for each send-message event.
 -	Reports collection/file: 
-•	Appended for POST /api/channels/:ch/report.
+    •	Appended for POST /api/channels/:ch/report.
 -	Upload storage (filesystem or object storage): 
-•	New files on profile/chat image uploads; deletions on DELETE /api/upload/image.
+    •	New files on profile/chat image uploads; deletions on DELETE /api/upload/image.
 -	In-memory maps (global, non-persistent): 
-•	Socket.IO channel room membership and presence.
-•	Video presence registry: peerId → username for active clients.
+    •	Socket.IO channel room membership and presence.
+    •	Video presence registry: peerId → username for active clients.
 
 Angular UI reacts via:
 •	Signals (AuthService.currentUser, isLoggedIn; GroupService.groups; ChannelService.allChannels).
@@ -454,15 +454,15 @@ Coverage
 •	Or Jest (optional) with ts-jest
 2.	What To Test
 •	Services: 
--	AuthService: login success/failure, user state signals.
--	GroupService: load/create/join/approve/etc. Use HttpTestingController to mock HTTP.
--	ChannelService: create/join/leave/ban/report/remove.
--	UploadService: POST form-data and delete behavior (mock HTTP).
--	Sockets/VideoService/PeerService: verify event registration and method calls (use spies/mocks; no real sockets).
+    -	AuthService: login success/failure, user state signals.
+    -	GroupService: load/create/join/approve/etc. Use HttpTestingController to mock HTTP.
+    -	ChannelService: create/join/leave/ban/report/remove.
+    -	UploadService: POST form-data and delete behavior (mock HTTP).
+    -	Sockets/VideoService/PeerService: verify event registration and method calls (use spies/mocks; no real sockets).
 •	Components: 
--	Login: form validation, submits, navigation on success.
--	Groups/Channels: renders lists from signals, reacts to mocked services, calls service methods on actions.
--	Video: creates PeerService connections (use spies), updates UI state on mocked events.
+    -	Login: form validation, submits, navigation on success.
+    -	Groups/Channels: renders lists from signals, reacts to mocked services, calls service methods on actions.
+    -	Video: creates PeerService connections (use spies), updates UI state on mocked events.
 3.	Example Service Test (HttpTestingController)
 ```
 import { TestBed } from '@angular/core/testing';
@@ -524,33 +524,33 @@ describe('GroupService', () => {
 ### 10. How To Run Tests
 1.	Server Tests (Mocha/Chai)
 •	Setup: 
--	cd server
--	npm install
+    -	cd server
+    -	npm install
 •	Run unit/integration tests: 
--	npm test
+    -	npm test
 •	Coverage: 
--	npm run coverage
+    -	npm run coverage
 •	Notes: 
--	Ensure test database or in-memory store is used.
--	If HTTPS is required, mock or disable TLS for tests.
+    -	Ensure test database or in-memory store is used.
+    -	If HTTPS is required, mock or disable TLS for tests.
 2.	Angular Unit Tests
 •	Setup: 
--	cd client
--	npm install
+    -	cd client
+    -	npm install
 •	Run: 
--	npm run test
+    -	npm run test
 •	Coverage: 
--	npm run test -- --code-coverage
--	Coverage report in coverage/ directory.
+    -	npm run test -- --code-coverage
+    -	Coverage report in coverage/ directory.
 3.	Angular E2E Tests
 •	Ensure backend and frontend are running: 
--	Backend: npm start (server)
--	Frontend: ng serve (client)
+    -	Backend: npm start (server)
+    -	Frontend: ng serve (client)
 •	Run Cypress: 
--	npm run e2e
+    -	npm run e2e
 •	Config: 
--	baseUrl set in cypress.config.ts to `http://localhost:4200`
--	Environment variables for API base if needed.
+    -	baseUrl set in cypress.config.ts to `http://localhost:4200`
+    -	Environment variables for API base if needed.
 
 
 
