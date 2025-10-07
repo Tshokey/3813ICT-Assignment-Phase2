@@ -3,14 +3,15 @@
 ## 1. Git Repository Organization
 **Repository Structures:**
 
-•	The project structure has been expanded to support real-time communication, video calling, and comprehensive backend integration
-•	Root Directory: Contains project configurations, documentation, and build files.
-•	Components folder (src/app/components/) - Enhanced with video calling functionality and improved UI components. Each component remains standalone for independent development and testing.
-•	Models folder (src/app/models/) - Expanded to include Message model for chat functionality and UserActivity interface for real-time events.
-•	Services folder (src/app/services/) - Significantly expanded with real-time communication services, video calling, file uploads, and full backend integration replacing localStorage.
-•	Guards folder (src/app/guards/) - Contains route protection logic for authenticated access.
+- The project structure has been expanded to support real-time communication, video calling, and comprehensive backend integration
+- Root Directory: Contains project configurations, documentation, and build files.
+- Components folder (src/app/components/) - Enhanced with video calling functionality and improved UI components. Each component remains standalone for independent development and testing.
+- Models folder (src/app/models/) - Expanded to include Message model for chat functionality and UserActivity interface for real-time events.
+- Services folder (src/app/services/) - Significantly expanded with real-time communication services, video calling, file uploads, and full backend integration replacing localStorage.
+- Guards folder (src/app/guards/) - Contains route protection logic for authenticated access.
 
 **Version Control**
+
 Development continues the main branch with incremental, meaningful commits. Each commit represents feature additions, bug fixes, or architectural improvements. Phase 2 commits focus on backend integration, real-time features, and video calling implementation.
 ---
 
@@ -91,16 +92,16 @@ export interface UserActivity {
 ### 3. REST API
 -	Phase 2 implements a comprehensive RESTful API with real-time communication capabilities:
 
+#### `Authentication API`
+
 Method | Route | Parameters | Return Values | Purpose
 ----- | ----- | ----- | ----- | ----- |
-POST | /api/users/register | {username, email, password} | {user} | Register a new user
-POST | /api/users/login | {username, password} | {user, token} | Authenticate user & return session token
-GET | /api/groups | - | Group[] | Fetch list of all available groups
-POST | /api/groups | {name} | {group} | Create a new group
-POST | /api/groups/:id/join | {userId} | {success} | Add a user to a group
-GET | /api/groups/:id/channels | - | Channel[] | Fetch channels ina group
-POST | /api/channels | {name, groupId} | {channel} | Create a new channel
-POST | /api/channels/:id/join | {userId} | {success) | Add a user to a channel
+POST | /api/auth/login | {username, password}	|{success, user?, message?}	|Authenticate user
+GET	| /api/auth/users | - | User[]	|Fetch all users
+POST | /api/auth/users|	Partial<User>	|{success, user?, message?}	|Create new user
+PUT	| /api/auth/users/:username|	Partial<User>|	{success, user?, message?}|	Update user
+DELETE | /api/auth/users/:username|	-|	{success, message?}|	Delete user
+
 
 - In Phase 2, angular will communicate with these endpoints using HttpClient service.
 ---
