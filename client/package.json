@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "ng e2e",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "prettier": {
     "printWidth": 100,
@@ -46,14 +49,31 @@
     "@angular/build": "^20.2.1",
     "@angular/cli": "^20.2.1",
     "@angular/compiler-cli": "^20.2.0",
+    "@cypress/schematic": "^4.1.4",
+    "@cypress/webpack-preprocessor": "^7.0.1",
+    "@playwright/test": "^1.56.0",
+    "@types/chai": "^5.2.2",
+    "@types/chai-http": "^3.0.5",
     "@types/jasmine": "~5.1.0",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/socket.io-client": "^1.4.36",
+    "chai": "^6.2.0",
+    "chai-http": "^5.1.2",
+    "cypress": "^15.4.0",
     "jasmine-core": "~5.9.0",
+    "jest": "^30.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "mocha": "^11.7.4",
+    "ts-jest": "^29.4.4",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.2",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
   }
 }

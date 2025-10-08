@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
 import Peer, { MediaConnection } from "peerjs"
-import { BehaviorSubject, type Observable } from "rxjs"
+import { BehaviorSubject, Observable } from "rxjs"
 
 @Injectable({
   providedIn: "root",
@@ -29,7 +29,7 @@ export class PeerService {
 
       this.peer.on("open", (id: string) => {
         console.log("[v0] My peer ID is:", id)
-        this.myPeerIdSubject.next(id)
+        this.myPeerIdSubject.next(id) //update current peer ID
       })
 
       this.peer.on("error", (error: Error) => {
@@ -55,7 +55,7 @@ export class PeerService {
 
   // Get my peer ID
   getMyPeerId(): Observable<string> {
-    return this.myPeerIdSubject.asObservable()
+    return this.myPeerIdSubject.asObservable() //other parts of app can subs it
   }
 
   // Get current peer ID value
