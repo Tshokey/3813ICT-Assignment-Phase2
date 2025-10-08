@@ -103,7 +103,7 @@ async function main() {
     require("./routes/channel.js")(db, app, ObjectId);
     require("./routes/upload.js")(db, app);
 
-    sockets.connect(io, PORT, db);
+    sockets.connect(io, db);
 
     listen.listen(server, PORT);
     console.log(`PeerServer is available at /peerjs on port ${PORT}`);
